@@ -1,20 +1,67 @@
 "use client"
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 
 import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
 import { navbar ,slides, products ,imageData,mainImages,secondRowImages, bannerItems, widgetItems, bannerImages, items, navbarMobileView } from './api/actions/photos';
-import { Caramel } from 'next/font/google';
 import BestPick from '@/components/BestPick';
 import TooHotTobeMissed from '@/components/TooHotTobeMissed';
 import { responsive,responsive_second,responsive_third,responsive_fourth,responsive_fifth, responsive_sixth } from '@/components/ResponsiveFeatures';
 import NavBar from '@/components/NavBar';
+import Modal from '@/components/modal';
+import { useSelector } from 'react-redux';
+// import { cookies } from 'next/headers';
 
 
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [signedup,setsignup]=useState(false)
+  const [email,setEmail]=useState("")
+  const [otp,setOtp]=useState("")
+  const handleSubmit=()=>{}
+  const user_email=useSelector(state=>state.number.email)
+  if(user_email) localStorage.setItem('user_email',user_email)
+  console.log("this is user_email",user_email)
+  console.log("this email has been set"),email
+  const handleOtpClick=async()=>{
+    try {
+      console.log("this email has been set"),email
+      const response = await axios.post('http://localhost:8080/api/verify-otp', {
+          email,
+          otp
+      });
+
+      // Handle the response as needed
+      if (response.data.success) {
+          console.log('Logged in successfully:', response.data);
+          // You can store the token in local storage or use it directly for further requests
+          localStorage.setItem('token', response.data.token);
+          // Redirect user or show success message
+      } else {
+          console.error('Error:', response.data.message);
+          // Show an error message to the user
+      }
+  } catch (error) {
+      console.error('Request failed:', error);
+      // Handle errors, like network issues, etc.
+  }
+  }
+  const resendTime=5
+  // console.log(localStorage.getItem('user_credentials'))
+  function gettoken() {
+    // const theme = JSON.parse(localStorage.getItem('user_credentials'))
+    // console.log(theme)
+    // setEmail(theme)
+    
+    if(theme){
+      // setsignup(true)
+
+      console.log(theme)
+      // console.log(signedup)
+      console.log(theme.email)
+    }
+  }
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prevSlide) => (prevSlide + 1) % slides.length);
@@ -24,13 +71,22 @@ export default function Home() {
     return () => clearInterval(timer);
   }, []);
 
+    useEffect(() => {
+      if (user_email) {
+        setsignup(true)
+        setEmail(user_email);
+        console.log(user_email)
+      }
+    }, []);
+  
   
   return (
+    <>
     <div className="min-h-screen w-full">
+    
       <div className="bg-white w-full shadow-sm">
         <NavBar/>
-      
-  <div className="w-full ">
+      <div className="w-full ">
     <div className="hidden xl:flex justify-center m-4 mx-10 ">
 
         {navbar.map((item) => (
@@ -124,14 +180,18 @@ export default function Home() {
 
       </div>
 
-      <div className='mt-4'>
+      <div className='hidden mt-4 md:block'>
         <img src='718372747.webp' className='w-full' alt='show pic'/>
+      </div>
+      
+      <div className='flex justify-center m-5 mt-10 md:hidden'>
+      <img src="https://images.bewakoof.com/uploads/grid/app/msite-thinstrip-batman-launch-1718976543.jpg" className="w-full rounded-xl " alt="banner"/>
       </div>
 
       <h1 className='flex justify-center items-center font-semibold text-2xl md:text-3xl m-2'>
         Shop by Category-Men
       </h1>
-      <div className="hidden md:grid grid-cols-6 gap-4">
+      <div className="hidden md:grid grid-cols-6 gap-y-4">
         {imageData.map((image, index) => (
           <div key={index} className=''>
             <img src={image.image} width={400} height={300} layout="responsive"/>
@@ -151,10 +211,10 @@ export default function Home() {
       <h1 className='flex justify-center text-2xl md:text-3xl font-semibold m-2'>
         Shop by Category- Women
       </h1>
-      <div className='hidden md:grid grid-cols-6 gap-4 ml-10'>
+      <div className='hidden md:grid grid-cols-6 gap-y-4'>
         {[...mainImages, ...secondRowImages].map((image, index) => (
-          <div key={index}>
-            <img src={image} width={200} height={300} layout="responsive"/>
+          <div key={index} className=''>
+            <img src={image}  layout="responsive" className='w-full'/>
           </div>
         ))}
       </div>
@@ -167,7 +227,7 @@ export default function Home() {
           ))}
         </Carousel>
       </div>
-      <h1 className='flex justify-center items-center font-semibold text-lg md:text-3xl m-2'>
+      <h1 className='flex justify-center items-center font-semibold text-lg md:text-3xl m-10'>
         EFFORTLESSLY STYLISH BESTSELLERS
       </h1>
       
@@ -175,13 +235,29 @@ export default function Home() {
        responsive={responsive_second}>
 
         {products.map((image, index) => (
-          <div key={index} className='mx-3'>
+          <div key={index} className='mx-3 border border-slate-200'>
+            <div className="absolute  left-3 bg-[#525252CC] text-white px-1 py-1 text-xs font-extralight">
+                  Oversized Fit
+            </div>
             <img src={image.imgSrc} width={500} height={500} layout="responsive"/>
+            <div className="mt-2 m-2">
+              <h1 className='font-sans text-[#4F5362] text-sm '>
+                Gezeno
+              </h1>
+            <h2 className="text-xs text-[#737373] font-light">
+                                 Women's Blue Moody Jerry Graphic Printed Oversized T-shirt
+                              </h2>
+            <div className="flex items-center mb-5">
+              <span className="text-md font-bold">₹709</span>
+              <span className="ml-2 text-gray-500 line-through">₹1,419</span>
+              <span className="ml-2 text-green-500">50% off</span>
+            </div>
+  </div>
           </div>
         ))}
 
       </Carousel>
-        <h1 className='flex justify-center  text-3xl font-semibold m-3'>
+        <h1 className='flex justify-center  text-3xl font-semibold m-10'>
           Gezeno Originals
         </h1>
        
@@ -212,7 +288,7 @@ export default function Home() {
         <div className='grid grid-cols-8'>
           
             
-          {widgetItems.map((images,index)=>(
+          {widgetItems && widgetItems.map((images,index)=>(
             <div key={index}>
               <img src={images.src} width={150} height={50} alt={index}/>
 
@@ -264,6 +340,6 @@ export default function Home() {
         
       </div>
     
-     
+    </>
   );
 }

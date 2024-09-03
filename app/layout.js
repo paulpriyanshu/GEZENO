@@ -1,8 +1,9 @@
 import { Inter,Roboto,Montserrat } from "next/font/google";
 import "./globals.css";
+import StoreProvider from "./StoreProvider";
 
 const montserrat=Montserrat({
-  weight:'500',
+  weight:'400',
   subsets:['latin'],
   display:'swap'
 })
@@ -15,7 +16,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <StoreProvider>
       <body className={montserrat.className}>{children}</body>
+      </StoreProvider>
     </html>
   );
 }
