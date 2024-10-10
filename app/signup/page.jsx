@@ -1,9 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { InputField } from "@/components/InputField";
-import { useDispatch, useSelector } from "react-redux";
+import { useAppSelector } from "../lib/hooks";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { useAppDispatch } from "../lib/hooks";
 import { addEmail, addName, addNumber } from "../lib/store/features/mobilenumber/mobileSlice";
 function Page() {
   const [name, setName] = useState("");
@@ -14,8 +15,8 @@ function Page() {
   const [gender,setGender]=useState("")
   const [response,setResponse]=useState("")
   const [credentials,setCredentials]=useState({})
-  const mobilenumber=useSelector(state=>state.number)
-  const dispatch=useDispatch()
+  const mobilenumber=useAppSelector(state=>state.number)
+  const dispatch=useAppDispatch()
 
   async function DispatchEmail (email) {
     dispatch(addEmail(email))
@@ -80,7 +81,7 @@ const router=useRouter()
             Sign Up
         </div>
             <div className=" text-xl font-bold  font-sans  text-center whitespace-nowrap mb-10">
-            Hi new buddy, let's get you started with the bewakoofi!
+            Hi new buddy, let&#39;s get you started with the bewakoofi!
           </div>
           <InputField label="Name" onChange={(e) => setName(e.target.value)} />
           <InputField

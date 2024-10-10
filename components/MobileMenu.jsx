@@ -15,7 +15,7 @@ export default function MobileMenu() {
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+        <div className="fixed inset-0 z-40 bg-white overflow-y-auto">
           <div className="p-4 border-b border-gray-200">
             <h5 className="text-lg font-semibold">Welcome Guest</h5>
             <div className="text-sm">

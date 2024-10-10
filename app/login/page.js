@@ -3,13 +3,13 @@ import NavBar from '@/components/NavBar';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from '../lib/hooks';
 import { addNumber } from '../lib/store/features/mobilenumber/mobileSlice';
 
 function Page() {
     const router=useRouter()
     const [mobileNumber,SetMobileNumber]=useState("")
-    const dispatch=useDispatch()
+    const dispatch=useAppDispatch()
     async function Dispatch (mobileNumber) {
         dispatch(addNumber(mobileNumber))
     }

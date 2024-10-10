@@ -12,8 +12,8 @@ function TooHotTobeMissed() {
     </h1>
     <Carousel
     swipeable={true}
-    draggable={true}
-    showDots={true}
+    draggable={false}
+    showDots={false}
     responsive={responsive_third}
     ssr={true} 
     infinite={true}
@@ -24,7 +24,9 @@ function TooHotTobeMissed() {
     transitionDuration={2000}
     containerClass="carousel-container"
     dotListClass="custom-dot-list-style flex justify-center mt-4"
-    itemClass="carousel-item-padding-40-px">
+    itemClass="carousel-item-padding-40-px"
+    arrows={false}
+    >
       {bannerImages.map((images,index)=>(
           (
             <div key={index}>

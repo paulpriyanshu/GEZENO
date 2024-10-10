@@ -26,7 +26,7 @@ function BestPick() {
          containerClass="carousel-container"
          dotListClass="custom-dot-list-style flex justify-center mt-4"
          itemClass="carousel-item-padding-40-px" 
-          arrows={false}
+        arrows={false}
          >
         {items.map((images,index)=>(
           <div key={index}>

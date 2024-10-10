@@ -1,13 +1,13 @@
 "use client"
 import React, { useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useAppSelector } from '../lib/hooks'
 import Modal from '@/components/modal'
 import axios from 'axios'
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation'
-function page() {
-const email=useSelector(state=>state.number.email)
-const name=useSelector(state=>state.number.name)
+function Page() {
+const email=useAppSelector(state=>state.number.email)
+const name=useAppSelector(state=>state.number.name)
 const [otp,setOtp]=useState("")
 const router=useRouter()
 const handleOtpClick=async()=>{
@@ -48,7 +48,7 @@ const handleOtpClick=async()=>{
   }
   const resendTime=5
 if(!email) return(
-    <div>
+    <div className='flex justify-center items-center h-screen text-2xl font-bold'>
         Please signup again
     </div>
 )
@@ -94,4 +94,4 @@ if(!email) return(
   )
 }
 
-export default page
+export default Page
