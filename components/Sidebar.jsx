@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react'
 
-export default function Sidebar(){
+function SideBar() {
   const [openFilters, setOpenFilters] = useState({});
 
   const toggleFilter = (filter) => {
@@ -62,6 +62,6 @@ export default function Sidebar(){
       ))}
     </aside>
   );
-};
+}
 
-
+export default SideBar
