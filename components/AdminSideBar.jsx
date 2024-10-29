@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from "react"
 import { Home, Package, Users, PieChart, Tag, ChevronRight, BookOpen, UserCircle, ChevronDown, Settings, Layout } from "lucide-react"
 import { useAppSelector } from "@/app/lib/hooks"
-import ProductsDropdown from "./ProductsDropDown"
+import ProductsDropdown from "@/components/ProductsDropdown"
+
 import PagesDropdown from "./PagesDropdown"
 import UserListDropdown from "./UserListDropdown"
 import { useRouter } from "next/navigation"
