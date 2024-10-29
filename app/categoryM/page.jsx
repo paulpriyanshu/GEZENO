@@ -1,8 +1,6 @@
 'use client'
 
 import { useState } from "react"
-import Image from "next/image"
-
 const tabs = ["Men", "Women", "Accessories"]
 
 const menSidebarCategories = ["Topwear", "Bottomwear", "Top Seller"]
