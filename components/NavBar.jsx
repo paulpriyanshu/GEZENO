@@ -5,7 +5,7 @@ import Cookies from 'js-cookie'
 import { useState } from 'react'
 import Dropdown from './DropDownMenu'
 import { useRouter } from 'next/navigation'
-import { toggleSidebar } from '@/app/lib/store/features/homesidebar/HomeSIdeBarSlice'
+import { toggleSidebar } from '@/app/lib/store/features/homesidebar/HomeSideBarSlice'
 import { useAppDispatch } from '@/app/lib/hooks'
 function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
