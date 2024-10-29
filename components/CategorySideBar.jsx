@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 
 
-function SideBar() {
+function CategorySideBar() {
   const [openFilters, setOpenFilters] = useState({});
 
   const toggleFilter = (filter) => {
@@ -65,4 +65,4 @@ function SideBar() {
   );
 }
 
-export default SideBar
+export default CategorySideBar
