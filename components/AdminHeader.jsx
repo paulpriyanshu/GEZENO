@@ -39,9 +39,9 @@ export default function AdminHeader() {
               <Menu className="h-6 w-6" onClick={() => dispatch(toggleSidebar())} />
             </Button>
             
-            <a href="/" className="flex items-center">
+            <div  className="flex items-center">
               <img src="logo.webp" alt="Gezeno Logo" className='w-20 md:w-28' />
-            </a>
+            </div>
           </div>
 
           {/* Navigation - hidden on mobile */}

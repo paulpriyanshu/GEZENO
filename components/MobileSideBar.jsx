@@ -16,15 +16,12 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { useDispatch } from "react-redux"
-import { toggleSidebar } from "@/app/lib/store/features/adminsidebar/SideBarSlice"
 
-export default function AdminSideBar() {
+export default function MobileSideBar() {
   const isOpen = useAppSelector((state) => state.sidebar.isOpen)
   const router = useRouter()
   const [activeBrands, setActiveBrands] = useState([])
   const [inactiveBrands, setInactiveBrands] = useState([])
-  const dispatch=useDispatch()
 
   useEffect(() => {
     const fetchBrands = async () => {
@@ -89,7 +86,7 @@ export default function AdminSideBar() {
     <div className="bg-white h-screen w-64 overflow-y-auto transition-all duration-300">
       <nav className="space-y-2 p-4">
         {menuItems.map((item, index) => (
-          <div key={index} className="w-full" >
+          <div key={index} className="w-full">
             {item.isDropdown ? (
               item.label === "Products" ? (
                 <div>
@@ -142,17 +139,26 @@ export default function AdminSideBar() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : item.label === "Home Page Setup" ? (
-                
-                <div>
-
-                    <Button variant="ghost" className="w-full justify-between" onClick={()=>router.push('/admin/homepagesetup')}>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="w-full justify-between">
                       <span className="flex items-center">
                         <Layout className="w-5 h-5 mr-3" />
                         Home Page Setup
                       </span>
+                      <ChevronDown className="w-4 h-4 ml-2" />
                     </Button>
-
-                </div>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56">
+                    <ScrollArea className="h-[300px]">
+                      {homePageSetupOptions.map((option, index) => (
+                        <DropdownMenuItem key={index} onSelect={() => handleNavigation(`home-page-setup/${option.toLowerCase().replace(/\s+/g, '-')}`)}>
+                          {option}
+                        </DropdownMenuItem>
+                      ))}
+                    </ScrollArea>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : null
             ) : (
               <Button

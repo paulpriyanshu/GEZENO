@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
-import { navbar ,slides, products ,imageData,mainImages,secondRowImages, bannerItems, widgetItems, bannerImages, items, navbarMobileView } from './api/actions/photos';
+import { navbar ,slides, products ,imageData,mainImages,secondRowImages, bannerItems, widgetItems, bannerImages, items, navbarMobileView } from './actions/photos';
 import BestPick from '@/components/BestPick';
 import TooHotTobeMissed from '@/components/TooHotTobeMissed';
 import { responsive,responsive_second,responsive_third,responsive_fourth,responsive_fifth, responsive_sixth, responsive_seventh, responsive_eigth } from '@/components/ResponsiveFeatures';

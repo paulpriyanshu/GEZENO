@@ -47,8 +47,8 @@ export default function OrdersPage() {
   const [sidebarOpen, setSidebarOpen] = React.useState(false)
 
   return (
-    <div className="flex h-screen bg-gray-100 overflow-hidden">
-      <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
+    <div className="container mx-auto p-4 overflow-hidden">
+      <main className="flex-1 overflow-x-hidden overflow-y-auto">
         <div className="container mx-auto px-4 py-8">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center">

@@ -12,7 +12,7 @@ import { Menu} from 'lucide-react'
 import { BarChart } from 'lucide-react'
 import { Settings } from 'lucide-react'
 import { useDispatch } from 'react-redux'
-import { toggleSidebar } from '../lib/store/features/adminsidebar/SideBarSlice'
+import { toggleSidebar } from '../../lib/store/features/adminsidebar/SideBarSlice'
 export default function Dashboard() {
   const [isOpen,setIsOpen]=useState(false)
   const dispatch=useDispatch()
@@ -40,7 +40,7 @@ export default function Dashboard() {
  
 
   return (
-    <div className="flex h-screen bg-gray-100 overflow-hidden">
+    <div className="container mx-auto p-4">
       <main className="flex-1 p-8 overflow-y-auto">
         <div className="mb-8 flex justify-between items-center">
           <div className="flex items-center space-x-4">

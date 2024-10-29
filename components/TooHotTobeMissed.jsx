@@ -2,7 +2,7 @@ import React from 'react'
 import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
 import { responsive_third } from './ResponsiveFeatures';
-import { bannerImages } from '@/app/api/actions/photos';
+import { bannerImages } from '@/app/actions/photos';
 
 function TooHotTobeMissed() {
   return (

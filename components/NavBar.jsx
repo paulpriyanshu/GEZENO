@@ -109,7 +109,7 @@ function NavBar() {
           <a href="#" className="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 justify-center" role="menuitem">My Account</a>
           <a href="#" className="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 justify-center" role="menuitem">My Wishlist</a>
           <a href="#" className="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 justify-center" role="menuitem">My Orders</a>
-          <a  className="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 justify-center hover:cursor-pointer" role="menuitem" onClick={()=>router.push('/admin')}>Admin</a>
+          <a  className="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 justify-center hover:cursor-pointer" role="menuitem" onClick={()=>router.push('/admin/home')}>Admin</a>
           <a href="#" className="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 justify-center" role="menuitem">Logout</a>
         </div>
       </div>

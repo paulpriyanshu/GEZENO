@@ -1,65 +1,60 @@
 "use client";
 
-import AdminHeader from "@/components/AdminHeader";
-import AdminSideBar from "@/components/AdminSideBar";
+import AdminHeader from "../../components/AdminHeader";
+import AdminSideBar from "../../components/AdminSideBar";
 import React, { useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { toggleSidebar } from "../lib/store/features/adminsidebar/SideBarSlice";
-import { useAppSelector } from "@/app/lib/hooks"; // To access Redux state
+import { useAppSelector } from "../lib/hooks";
 
 export default function Layout({ children }) {
-  const isOpen = useAppSelector((state) => state.sidebar.isOpen); // Get sidebar open state from Redux
+  const isOpen = useAppSelector((state) => state.sidebar.isOpen);
   const dispatch = useDispatch();
-  const sidebarRef = useRef(null); // Reference to the sidebar
+  const sidebarRef = useRef(null);
 
-  // Function to handle click outside
   const handleClickOutside = (event) => {
-    // If sidebar is open and the clicked element is not inside the sidebar
     if (isOpen && sidebarRef.current && !sidebarRef.current.contains(event.target)) {
-      dispatch(toggleSidebar()); // Close the sidebar
+      dispatch(toggleSidebar());
     }
   };
 
-  // Add event listener for clicks outside the sidebar
   useEffect(() => {
     if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside); // Listen for mouse clicks
+      document.addEventListener("mousedown", handleClickOutside);
     } else {
-      document.removeEventListener("mousedown", handleClickOutside); // Remove listener when sidebar is closed
+      document.removeEventListener("mousedown", handleClickOutside);
     }
 
-    // Cleanup the event listener on component unmount
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen]);
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen bg-gray-100">
       <AdminHeader />
-      <div className="flex">
-        {/* Sidebar - hidden by default on smaller screens */}
+      <div className="flex flex-1 relative overflow-hidden">
         <div
-  ref={sidebarRef}
-  className={`fixed lg:static transform lg:transform-none ${isOpen ? "translate-x-0" : "-translate-x-full"} 
-  transition-transform duration-200 ease-in-out z-50 w-64 bg-white lg:block lg:w-1/6`}
->
-          <AdminSideBar />
+          ref={sidebarRef}
+          className={`fixed inset-y-0 left-0 z-50 w-64 bg-white transition-transform duration-200 ease-in-out ${
+            isOpen ? 'translate-x-0' : '-translate-x-full'
+          } lg:relative lg:translate-x-0`}
+          style={{ top: 'var(--header-height, 0px)' }}
+        >
+          <div className="h-full overflow-y-auto">
+            <AdminSideBar />
+          </div>
         </div>
-
-        {/* Overlay for smaller screens when sidebar is open */}
         {isOpen && (
           <div
-            className="fixed inset-0 bg-black opacity-50 lg:hidden"
-            onClick={() => dispatch(toggleSidebar())} // Close sidebar when clicking on the overlay
+            className="fixed inset-0 bg-black bg-opacity-50 lg:hidden z-40"
+            onClick={() => dispatch(toggleSidebar())}
           />
         )}
-
-        {/* Main content area */}
-        <div className="w-full lg:w-5/6">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-4 ">
           {children}
-        </div>
+        </main>
       </div>
-    </>
+    </div>
   );
 }
