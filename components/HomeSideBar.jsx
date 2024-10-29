@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { X } from 'lucide-react'
 import { useDispatch } from 'react-redux'
-import { toggleSidebar } from '@/app/lib/store/features/homesidebar/HomeSIdeBarSlice'
+import { toggleSidebar } from '@/app/lib/store/features/homesidebar/HomeSideBarSlice'
 
 const menuItems = [
   { name: 'Men', imgSrc: 'https://images.bewakoof.com/nav_menu/Circle-icon-men--1--1684748735.png' },

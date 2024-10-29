@@ -11,7 +11,7 @@ import { useAppSelector } from './lib/hooks';
 import TopHeader from '@/components/TopHeader';
 import MobileHomeFooter from '@/components/MobileHomeFooter';
 import MobileFooterDropdown  from '@/components/MobileFooterDropDown';
-import HomeSIdeBarSlice from './lib/store/features/homesidebar/HomeSIdeBarSlice';
+// import HomeSIdeBarSlice from './lib/store/features/homesidebar/HomeSIdeBarSlice';
 import HomeSideBar from '@/components/HomeSideBar';
 import Footer from '@/components/Footer';
 export default function Home() {
