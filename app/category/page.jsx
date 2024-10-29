@@ -1,10 +1,11 @@
 "use client"
 import React from 'react';
+
 import NavBar from '@/components/NavBar';
 // import Sidebar from '@/components/SideBar';
 import MobileHeader from '@/components/MobileHeader';
 import MobileFooter from '@/components/MobileFooter';
-import Sidebar from '../../components/SideBar';
+import SideBar from '@/components/SideBar';
 
 const ProductCard = ({ image, title, price }) => (
   <div className="bg-white rounded shadow">
@@ -37,7 +38,7 @@ const Category = () => {
 
         <div className="flex">
           <div className="hidden md:block "> {/* Sidebar visible only on small screens */}
-            <Sidebar/>
+            <SideBar/>
           </div>
           <div className="flex-1 ml-0 md:ml-8"> {/* Adjusts spacing on larger screens */}
             <div className="hidden md:block justify-between items-center mb-6">
