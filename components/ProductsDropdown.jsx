@@ -43,7 +43,7 @@ export default function ProductsDropdown() {
     setCategoriesError(null)
 
     try {
-      const response = await axios.get('http://backend.gezeno.com/api/categories')
+      const response = await axios.get('https://backend.gezeno.com/api/categories')
       
       if (!response.data || !response.data.success || !Array.isArray(response.data.categories)) {
         throw new Error('Invalid response format')
@@ -65,7 +65,7 @@ export default function ProductsDropdown() {
     setBrandsError(null)
 
     try {
-      const response = await axios.get('http://backend.gezeno.com/api/getallbrands')
+      const response = await axios.get('https://backend.gezeno.com/api/getallbrands')
       
       if (!response.data || !response.data.success || !Array.isArray(response.data.data)) {
         throw new Error('Invalid response format')
@@ -120,7 +120,7 @@ export default function ProductsDropdown() {
       setAddingCategory(false)
 
       try {
-        const response = await axios.post('http://backend.gezeno.com/api/createcategory', {
+        const response = await axios.post('https://backend.gezeno.com/api/createcategory', {
           name: newCategoryInput
         })
         if (response.data && response.data.success) {
@@ -162,7 +162,7 @@ export default function ProductsDropdown() {
         const category = categories.find(c => c._id === categoryId)
         if (!category) return
 
-        const response = await axios.post('http://backend.gezeno.com/api/createsubcategory', {
+        const response = await axios.post('https://backend.gezeno.com/api/createsubcategory', {
           name: newSubCategoryInput,
           categoryName: category.name
         })
@@ -231,7 +231,7 @@ export default function ProductsDropdown() {
         const subCategory = category?.subCategories.find(sc => sc._id === subCategoryId)
         if (!category || !subCategory) return
 
-        const response = await axios.post('http://backend.gezeno.com/api/createsubsubcategory', {
+        const response = await axios.post('https://backend.gezeno.com/api/createsubsubcategory', {
           name: newSubSubCategoryInput,
           categoryName: category.name,
           subCategoryName: subCategory.name
@@ -295,7 +295,7 @@ export default function ProductsDropdown() {
 
   const handleDeleteCategory = async (categoryName) => {
     try {
-      const response = await axios.post(`http://backend.gezeno.com/api/deletecategory/${categoryName}`)
+      const response = await axios.post(`https://backend.gezeno.com/api/deletecategory/${categoryName}`)
       if (response.data && response.data.success) {
         setCategories(prevCategories => prevCategories.filter(cat => cat.name !== categoryName))
       } else {

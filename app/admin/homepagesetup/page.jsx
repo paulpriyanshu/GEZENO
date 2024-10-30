@@ -18,8 +18,8 @@ export default function ProductCategoryDisplay() {
   const fetchData = async () => {
     try {
       const [categoriesRes, productsRes] = await Promise.all([
-        axios.get('http://backend.gezeno.com/api/categories'),
-        axios.get('http://backend.gezeno.com/api/getproducts')
+        axios.get('https://backend.gezeno.com/api/categories'),
+        axios.get('https://backend.gezeno.com/api/getproducts')
       ])
 
       setCategories(categoriesRes.data.categories)

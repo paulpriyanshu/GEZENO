@@ -18,7 +18,7 @@ export default function BrandsPage() {
   useEffect(() => {
     const fetchBrands = async () => {
       try {
-        const response = await axios.get('http://backend.gezeno.com/api/getallbrands')
+        const response = await axios.get('https://backend.gezeno.com/api/getallbrands')
         if (response.data.success && Array.isArray(response.data.data)) {
           setBrands(response.data.data)
         } else {

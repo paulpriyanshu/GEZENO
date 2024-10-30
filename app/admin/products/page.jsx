@@ -67,7 +67,7 @@ export default function ProductsPage() {
   const fetchProducts = async () => {
     try {
       setLoading(true)
-      const response = await axios.get('http://backend.gezeno.com/api/getproducts')
+      const response = await axios.get('https://backend.gezeno.com/api/getproducts')
       setProducts(response.data)
       setFilteredProducts(response.data)
       setLoading(false)
@@ -81,8 +81,8 @@ export default function ProductsPage() {
   const fetchCategoriesAndBrands = async () => {
     try {
       const [categoriesResponse, brandsResponse] = await Promise.all([
-        axios.get('http://backend.gezeno.com/api/categories'),
-        axios.get('http://backend.gezeno.com/api/getallbrands')
+        axios.get('https://backend.gezeno.com/api/categories'),
+        axios.get('https://backend.gezeno.com/api/getallbrands')
       ])
       setCategories(categoriesResponse.data.categories)
       setBrands(brandsResponse.data.data)
@@ -122,7 +122,7 @@ export default function ProductsPage() {
 
   const handleDeleteProduct = async (id) => {
     try {
-      await axios.post(`http://backend.gezeno.com/api/deleteproduct/${id}`)
+      await axios.post(`https://backend.gezeno.com/api/deleteproduct/${id}`)
       await fetchProducts()
       toast.success("Product deleted successfully")
     } catch (err) {
@@ -130,7 +130,7 @@ export default function ProductsPage() {
       toast.error("Failed to delete product. Please try again.")
     }
   }
-  
+
 
   const handleEditProduct = (product) => {
     setCurrentProductForEdit(product)
@@ -214,7 +214,7 @@ export default function ProductsPage() {
       try {
         const uploadPromises = files.map(async (file, fileIndex) => {
           try {
-            const response = await axios.get(`http://backend.gezeno.com/api/imageUpload/${file.name}`);
+            const response = await axios.get(`https://backend.gezeno.com/api/imageUpload/${file.name}`);
             const { url, filename } = response.data;
   
             await axios.put(url, file, {
@@ -229,7 +229,7 @@ export default function ProductsPage() {
               }
             });
   
-            const imageUrlResponse = await axios.get(`http://backend.gezeno.com/api/image/${filename}`);
+            const imageUrlResponse = await axios.get(`https://backend.gezeno.com/api/image/${filename}`);
             const imageUrl = imageUrlResponse.data.url;
   
             return { url: imageUrl, filename: filename };
@@ -298,7 +298,7 @@ export default function ProductsPage() {
         reviews: [],
         images: newProduct.images
       }
-      await axios.post('http://backend.gezeno.com/api/createproduct', productData)
+      await axios.post('https://backend.gezeno.com/api/createproduct', productData)
       setShowNewProductDialog(false)
       await fetchProducts()
       toast.success("Product added successfully")
@@ -332,7 +332,7 @@ export default function ProductsPage() {
           sizes: variant.sizes,
           images: variant.images
         }
-        await axios.post('http://backend.gezeno.com/api/create-product-variant', variantData)
+        await axios.post('https://backend.gezeno.com/api/create-product-variant', variantData)
       }
       setShowVariantDialog(false)
       await fetchProducts()
@@ -360,7 +360,7 @@ export default function ProductsPage() {
         price: parseFloat(currentProductForEdit.price),
         stock: parseInt(currentProductForEdit.stock, 10)
       }
-      await axios.post(`http://backend.gezeno.com/api/updateproduct/${currentProductForEdit._id}`, productData)
+      await axios.post(`https://backend.gezeno.com/api/updateproduct/${currentProductForEdit._id}`, productData)
       setShowEditDialog(false)
       await fetchProducts()
       toast.success("Product updated successfully")
