@@ -1,4 +1,5 @@
 import Carousel from "react-multi-carousel"
+import ProductCard from "./ProductCard"
 const responsiveProductCarousel = {
     desktop: {
       breakpoint: { max: 3000, min: 1024 },
