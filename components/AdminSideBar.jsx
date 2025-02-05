@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { Home, Package, Users, PieChart, Tag, ChevronRight, BookOpen, UserCircle, ChevronDown, Settings, Layout } from "lucide-react"
+import { Home, Package, Users, PieChart, Tag, ChevronRight, BookOpen, UserCircle, ChevronDown, Settings, Layout ,Menu, Handshake } from "lucide-react"
 import { useAppSelector } from "@/app/lib/hooks"
 import ProductsDropdown from "@/components/ProductsDropdown"
 
@@ -30,8 +30,8 @@ export default function AdminSideBar() {
   useEffect(() => {
     const fetchBrands = async () => {
       try {
-        const activeResponse = await fetch('https://backend.gezeno.com/api/getactivebrands')
-        const inactiveResponse = await fetch('https://backend.gezeno.com/api/getinactivebrands')
+        const activeResponse = await fetch('https://backend.gezeno.in/api/getactivebrands')
+        const inactiveResponse = await fetch('https://backend.gezeno.in/api/getinactivebrands')
         
         const activeData = await activeResponse.json()
         const inactiveData = await inactiveResponse.json()
@@ -54,13 +54,14 @@ export default function AdminSideBar() {
     { icon: Home, label: "Home", route: "home" },
     { icon: Package, label: "Products", route: "products", isDropdown: true },
     { icon: Users, label: "Customers", route: "customers" },
+    { icon: Handshake, label: "T & C", route: "T&C" },   
     { icon: PieChart, label: "Analytics", route: "analytics" },
     { icon: Package, label: "Orders", route: "orders" },
     { icon: Tag, label: "Discounts", route: "discounts" },
-    { icon: BookOpen, label: "Pages", route: "pages", isDropdown: true },
     { icon: UserCircle, label: "User List", route: "user-list", isDropdown: true },
     { icon: Layout, label: "Home Page Setup", route: "home-page-setup", isDropdown: true },
-    { icon: Settings, label: "Settings", route: "settings" },
+    { icon: Settings, label: "Settings", route: "settings" },  
+   
   ]
 
   const homePageSetupOptions = [
@@ -96,9 +97,7 @@ export default function AdminSideBar() {
                 <div>
                   <ProductsDropdown/>
                 </div>
-              ) : item.label === "Pages" ? (
-                <PagesDropdown />
-              ) : item.label === "User List" ? (
+              )  : item.label === "User List" ? (
                 <UserListDropdown />
               ) : item.label === "Active Brands" ? (
                 <DropdownMenu>
@@ -152,7 +151,19 @@ export default function AdminSideBar() {
                         Home Page Setup
                       </span>
                     </Button>
-
+                    <Button variant="ghost" className="w-full justify-between" onClick={()=>router.push('/admin/mobilesidebar')}>
+                      <span className="flex items-center">
+                        <Menu className="w-5 h-5 mr-3" />
+                        Mobile Side Bar
+                      </span>
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-between" onClick={()=>router.push('/admin/submenu')}>
+                      <span className="flex items-center">
+                        <Menu className="w-5 h-5 mr-3" />
+                        Sub Menu
+                      </span>
+                    </Button>
+                  
                 </div>
               ) : null
             ) : (

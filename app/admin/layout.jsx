@@ -10,7 +10,7 @@ import { useAppSelector } from "../lib/hooks";
 export default function Layout({ children }) {
   const isOpen = useAppSelector((state) => state.sidebar.isOpen);
   const dispatch = useDispatch();
-  const sidebarRef = useRef(null);
+const sidebarRef = useRef(null);
 
   const handleClickOutside = (event) => {
     if (isOpen && sidebarRef.current && !sidebarRef.current.contains(event.target)) {

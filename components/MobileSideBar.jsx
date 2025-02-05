@@ -26,8 +26,8 @@ export default function MobileSideBar() {
   useEffect(() => {
     const fetchBrands = async () => {
       try {
-        const activeResponse = await fetch('https://backend.gezeno.com/api/getactivebrands')
-        const inactiveResponse = await fetch('https://backend.gezeno.com/api/getinactivebrands')
+        const activeResponse = await fetch('https://backend.gezeno.in/api/getactivebrands')
+        const inactiveResponse = await fetch('https://backend.gezeno.in/api/getinactivebrands')
         
         const activeData = await activeResponse.json()
         const inactiveData = await inactiveResponse.json()

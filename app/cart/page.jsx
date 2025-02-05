@@ -1,138 +1,322 @@
-
+"use client"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { LockIcon, PackageIcon, RefreshCcwIcon } from "lucide-react"
-import  CardFooter  from "@/components/CheckoutFooter"
+import { ChevronLeft, Heart, ShoppingCart, Truck, X, Trash2 } from 'lucide-react'
+import Link from "next/link"
+import Loading from "../category/[name]/[id]/loading"
 import NavBar from "@/components/NavBar"
-import CheckoutFooter from "@/components/CheckoutFooter"
+import axios from "axios"
+import { useRouter } from "next/navigation"
 
 export default function Page() {  
+  const [NavBarData,setNavBarData]=useState([])
+  const [isLoading,setLoading]=useState(true)
+  const [cartItems, setCartItems] = useState([]);
+  const [cartProducts, setCartProducts] = useState([]);
+  const [cartLoading, setCartLoading] = useState(true);
+  const router=useRouter()
+
+  useEffect(()=>{
+    const fetchData=async()=>{
+     try {
+       const homeresponse=await axios.get('https://backend.gezeno.in/api/home/headers')
+       setNavBarData(homeresponse.data)
+      //  console.log(homeresponse.data)
+     } catch (error) {
+        console.log("error",error)
+     }finally{
+      setLoading(false)
+     }
+    }
+    fetchData()
+  },[])
+
+  const removeFromCart = (productId) => {
+    setCartLoading(true);
+    // Match the ID with the same type that's stored in cartItems
+    const updatedCartItems = cartItems.filter(id => id !== productId);
+    localStorage.setItem('cart', JSON.stringify(updatedCartItems));
+    setCartItems(updatedCartItems);
+    // Use _id for filtering products since that's what the API returns
+    setCartProducts(prevProducts => prevProducts.filter(product => product._id !== productId));
+    setCartLoading(false);
+  };
+
+  const fetchCartProducts = async () => {
+    setCartLoading(true);
+    try {
+      const cartData = localStorage.getItem('cart');
+      const cartItems = cartData ? JSON.parse(cartData) : [];
+      setCartItems(cartItems);
+
+      const productPromises = cartItems.map(id =>
+        axios.get(`https://backend.gezeno.in/api/products/${id}`)
+          .then(res => res.data)
+          .catch(err => {
+            console.error(`Error fetching product ${id}:`, err);
+            return null;
+          })
+      );
+
+      const products = await Promise.all(productPromises);
+      const validProducts = products.filter(product => product !== null);
+      setCartProducts(validProducts);
+    } catch (error) {
+      console.error("Error fetching cart products:", error);
+    } finally {
+      setCartLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCartProducts();
+  }, []);
+
+  useEffect(() => {
+    console.log('Cart updated:', cartItems.length);
+  }, [cartItems]);
+  
+  if(isLoading){
+    return <Loading/>
+  }
+
   return (
-    <>
-    <NavBar/>
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">My Bag2 item(s)</h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="md:col-span-2">
-          <div className=" border border-l-slate-200">
-            <div className="p-6">
-              <div className="flex gap-4">
-              <img 
-                  src="https://images.bewakoof.com/t320/men-s-black-all-over-printed-pyjama-608420-1697626367-1.jpg" 
-                  alt="cart-image" 
-                  className="md:w-1/5 md:h-1/5 w-1/3 h-1/3"
-                />
+    <div className="min-h-screen bg-white">
+      <div className="hidden md:block">
+        <NavBar data={NavBarData}/>
+      </div>
+      
+      {/* Mobile Header */}
+      <div className="md:hidden flex items-center justify-between p-4 border-b">
+        <div className="flex items-center gap-4">
+          <div onClick={()=>router.back()} className="p-1">
+            <ChevronLeft className="h-5 w-5" />
+          </div>
+          <div>
+            <h1 className="text-base font-medium">Shopping Cart</h1>
+            <p className="text-sm text-gray-500">{cartProducts.length} items</p>
+          </div>
+        </div>
+        <Button variant="ghost" size="icon">
+          <Heart className="h-5 w-5" />
+        </Button>
+      </div>
 
+      {/* Desktop Header */}
+      <div className="hidden md:block container mx-auto p-4">
+        <h1 className="text-2xl font-medium mb-6">My Bag ({cartProducts.length} items)</h1>
+      </div>
 
-                <div className="flex-1">
-                  <h2 className="text-lg font-semibold">Men&#39;s White All Over Printed Pyjamas</h2>
-                  <div className="flex justify-between items-center mt-2">
-                    <div>
-                      <p className="text-xl font-bold">₹709</p>
-                      <p className="text-sm line-through text-gray-500">₹1,419</p>
-                      <p className="text-green-600">You saved ₹900!</p>
-                    </div>
-                    <div>
-                      <p>Size: S</p>
-                      <p>Qty: 1</p>
+      <div className="container mx-auto p-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
+          {/* Cart Items */}
+          <div className="md:col-span-2">
+            {cartLoading ? (
+              <div className="flex justify-center items-center h-40">
+                <p>Updating cart...</p>
+              </div>
+            ) : cartProducts.length === 0 ? (
+              <div className="text-center p-8 border rounded-lg">
+                <p className="text-gray-500">Your cart is empty</p>
+                <Link href="/products" className="text-primary hover:underline mt-2 inline-block">
+                  Continue Shopping
+                </Link>
+              </div>
+            ) : (
+              cartProducts.map((product) => (
+                <div key={Math.random()} className="border rounded-lg mb-4">
+                  <div className="p-4 md:p-6">
+                    <div className="flex gap-4 md:gap-6 relative">
+                      <button className="absolute right-0 top-0 md:hidden">
+                        <X className="h-5 w-5" />
+                      </button>
+                      <img 
+                        src={product.images[0].url || "/placeholder.svg"} 
+                        alt={product.name} 
+                        className="w-24 md:w-32 h-32 md:h-40 object-cover"
+                      />
+                      <div className="flex-1">
+                        <h2 className="text-base md:text-lg font-medium pr-6 md:pr-0">
+                          {product.name}
+                        </h2>
+                        <div className="flex flex-col md:flex-row md:justify-between md:items-start mt-2 md:mt-4">
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-lg md:text-xl font-bold">
+                                ₹{product.price}
+                              </span>
+                              {product.mrp && product.mrp > product.price && (
+                                <span className="text-sm line-through text-gray-500">
+                                  ₹{product.mrp}
+                                </span>
+                              )}
+                            </div>
+                            {/* Price Breakdown */}
+                            <div className="text-sm text-gray-600 space-y-1">
+                              <div className="flex justify-between">
+                                <span>Base Price:</span>
+                                <span>₹{product.mrp || product.price}</span>
+                              </div>
+                              {product.mrp && product.mrp > product.price && (
+                                <div className="flex justify-between text-green-600">
+                                  <span>Discount:</span>
+                                  <span>-₹{product.mrp - product.price}</span>
+                                </div>
+                              )}
+                              <div className="flex justify-between font-medium">
+                                <span>Final Price:</span>
+                                <span>₹{product.price}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-sm mt-2 md:mt-0">
+                            <p>Size: {product.size || 'Standard'}</p>
+                            <p>Qty: 1</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 mt-2 md:mt-4 text-sm text-gray-600">
+                          <Truck className="h-4 w-4" />
+                          <span>Delivery by {new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString()}</span>
+                        </div>
+                        {/* Remove Button */}
+                        <Button 
+                          variant="ghost" 
+                          className="mt-4 text-red-500 hover:text-red-600 hover:bg-red-50 p-0 h-auto"
+                          onClick={() => removeFromCart(product._id)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Remove
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-600 mt-2">Delivery by 22 Jul 2024</p>
                 </div>
+              ))
+            )}
+          </div>
+
+          {/* Price Summary */}
+          <div className="space-y-4">
+            {/* Offer Card */}
+            <Card className="border-gray-200">
+              <CardContent className="p-3 md:p-4">
+                <p className="text-sm">
+                  Whistles! Get extra 10% cashback on all prepaid orders above Rs.499. Use Code - PREP10.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Coupon Section */}
+            <div className="bg-[#f0f7f7] rounded-lg">
+              <div className="px-4 py-3 flex items-center justify-between">
+                <span className="text-[#38b2ac] text-sm">Apply Coupon/Gift Card/Referral</span>
+                <Button variant="link" className="text-[#38b2ac] font-medium p-0">
+                  Redeem »
+                </Button>
               </div>
             </div>
 
+            {/* Price Summary Card */}
+            <Card>
+              <CardHeader className="bg-gray-50 py-3">
+                <CardTitle className="text-sm font-medium">PRICE SUMMARY</CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 space-y-3">
+                {/* Individual Product Prices */}
+                {cartProducts.map((product) => (
+                  <div key={`summary-${product.id}`} className="text-sm border-b pb-2 last:border-0">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">{product.name}</span>
+                      <span>₹{product.price}</span>
+                    </div>
+                    {product.mrp && product.mrp > product.price && (
+                      <div className="flex justify-between text-green-600 text-xs">
+                        <span>Saved</span>
+                        <span>₹{product.mrp - product.price}</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {/* Summary Totals */}
+                <div className="pt-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Total MRP (Incl. of taxes)</span>
+                    <span>₹{cartProducts.reduce((total, item) => total + (item.mrp || item.price), 0)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Delivery Fee</span>
+                    <span className="text-green-600">FREE</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Bag Discount</span>
+                    <span>- ₹{cartProducts.reduce((total, item) => total + ((item.mrp || item.price) - item.price), 0)}</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-sm pt-2">
+                    <span>Subtotal</span>
+                    <span>₹{cartProducts.reduce((total, item) => total + item.price, 0)}</span>
+                  </div>
+                </div>
+              </CardContent>
+
+              <div className="bg-[#e6f3f3] p-3 text-center text-sm">
+                You are saving ₹{cartProducts.reduce((total, item) => total + ((item.mrp || item.price) - item.price), 0)} on this order
+              </div>
+
+              <div className="px-4 py-3 bg-blue-50 mt-4">
+                <div className="flex items-center gap-2">
+                  <img src="/icon-free-delivery.svg" alt="" className="w-8 h-8 md:w-10 md:h-10" />
+                  <span className="text-sm font-medium">
+                    Yay! You get FREE delivery on this order
+                  </span>
+                </div>
+              </div>
+
+              {/* Fixed Bottom Bar on Mobile */}
+              <div className="fixed bottom-0 left-0 right-0 bg-white p-4 border-t md:relative md:border-t md:mt-4 md:p-4">
+                <div className="flex justify-between items-center max-w-lg mx-auto">
+                  <div>
+                    <p className="text-sm">Total</p>
+                    <p className="font-bold">₹{cartProducts.reduce((total, item) => total + item.price, 0)}</p>
+                  </div>
+                  <Button 
+                    className="bg-[#38b2ac] hover:bg-[#319795] text-white px-8 md:px-12 py-6"
+                    disabled={cartProducts.length === 0}
+                  >
+                    Proceed
+                  </Button>
+                </div>
+              </div>
+            </Card>
+
+            {/* Trust Badges - Hidden on Mobile */}
+            <div className="hidden md:grid grid-cols-3 gap-4 text-center">
+              <div>
+                <img src="/trust-cart.svg" alt="" className="w-12 h-12 mx-auto mb-2" />
+                <p className="text-xs">100% SECURE PAYMENTS</p>
+              </div>
+              <div>
+                <img src="/Easy-Returns.svg" alt="" className="w-12 h-12 mx-auto mb-2" />
+                <p className="text-xs">EASY RETURNS & QUICK REFUNDS</p>
+              </div>
+              <div>
+                <img src="/original-icon.webp" alt="" className="w-12 h-12 mx-auto mb-2" />
+                <p className="text-xs">QUALITY ASSURANCE</p>
+              </div>
+            </div>
+
+            {/* Payment Methods - Hidden on Mobile */}
+            <div className="hidden md:block border rounded-lg p-4">
+              <p className="text-sm font-medium mb-3">100% secure transaction</p>
+              <img src="/Payment-trust-banner.svg" alt="Payment methods" className="w-full" />
+            </div>
           </div>
         </div>
-        <div>
-        <div className="mb-4 border border-slate-300">
-        <CardContent className="p-4">
-          <p className="text-sm">
-            Whistles! Get extra 10% cashback on all prepaid orders above Rs.499. Use Code - PREP10.
-          </p>
-        </CardContent>
       </div>
 
-      <div className="mb-4 bg-[#f0f7f7]">
-        <div className="px-4 flex items-center">
-          <div className="text-[#38b2ac] text-xs w-full">Apply Coupon/Gift Card/Referral</div>
-          <Button variant="link" className="text-[#38b2ac] font-bold">
-            Redeem »
-          </Button>
-        </div>
-      </div>
-
-      <Card>
-        <CardHeader className="bg-gray-100">
-          <CardTitle className="text-sm">PRICE SUMMARY</CardTitle>
-        </CardHeader>
-        <CardContent className="p-4">
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Total MRP (Incl. of taxes)</span>
-              <span>₹2448</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Delivery Fee</span>
-              <span className="text-green-600">FREE</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Bag Discount</span>
-              <span>- ₹1500</span>
-            </div>
-            <div className="flex justify-between font-bold">
-              <span>Subtotal</span>
-              <span>₹948</span>
-            </div>
-          </div>
-        </CardContent>
-        <CardContent className="bg-[#e6f3f3] p-2 text-center text-black">
-          You are saving ₹ 1500 on this order
-        </CardContent>
-        <div className="p-2 mt-4 bg-blue-50">
-          <div className="flex items-center w-full ">
-          <img src="icon-free-delivery.svg" alt="delivery info" class="gh-df-img-free"/>
-            <span className="font-semibold text-sm ">Yay! You get FREE delivery on this order</span>
-          </div>
-        </div>
-        <CardFooter className="p-4">
-          <div className="w-full flex justify-between items-center">
-            <div>
-              <div className="font-semibold text-sm">Total</div>
-              <div className="text-sm font-bold">₹948</div>
-            </div>
-            <Button className="bg-[#38b2ac] hover:bg-[#319795] text-black px-12 py-6 text-lg">
-              Proceed
-            </Button>
-          </div>
-        </CardFooter>
-      </Card>
-          <div className="mt-6 grid grid-cols-3 gap-4 text-center text-sm">
-            <div>
-              <LockIcon className="mx-auto h-6 w-6 text-gray-400" />
-              <p>100% SECURE PAYMENTS</p>
-            </div>
-            <div>
-              <RefreshCcwIcon className="mx-auto h-6 w-6 text-gray-400" />
-              <p>EASY RETURNS & QUICK REFUNDS</p>
-            </div>
-            <div>
-              <PackageIcon className="mx-auto h-6 w-6 text-gray-400" />
-              <p>QUALITY ASSURANCE</p>
-            </div>
-          </div>
-          <img src="Payment-trust-banner.svg" alt="payment" className="mt-5 rounded-xl"/>
-        </div>
-        
-      </div>
-
-      <CheckoutFooter/>
-     
-    
+      {/* Add bottom padding to account for fixed proceed button on mobile */}
+      <div className="h-20 md:h-0" />
     </div>
-   
-   
-    </>
   )
 }
+

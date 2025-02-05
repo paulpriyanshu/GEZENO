@@ -13,7 +13,7 @@ const router=useRouter()
 const handleOtpClick=async()=>{
     try {
       console.log("this email has been set",email)
-      const response = await axios.post('http://localhost:8080/api/verify-otp', {
+      const response = await axios.post('https://backend.gezeno.in/api/verify-otp', {
           email,
           otp
       });

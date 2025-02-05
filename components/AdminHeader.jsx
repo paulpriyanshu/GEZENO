@@ -39,8 +39,8 @@ export default function AdminHeader() {
               <Menu className="h-6 w-6" onClick={() => dispatch(toggleSidebar())} />
             </Button>
             
-            <div  className="flex items-center">
-              <img src="logo.webp" alt="Gezeno Logo" className='w-20 md:w-28' />
+            <div  className="flex items-center cursor-pointer" onClick={()=>router.push('/')}>
+              <img src="/logo.webp" alt="Gezeno Logo" className='w-20 md:w-28' />
             </div>
           </div>
 

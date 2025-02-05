@@ -1,84 +1,72 @@
-"use client"
-import React from 'react';
-import { useRouter } from 'next/navigation';
+'use client'
 
-const DropDownMenu = () => {
-  const router = useRouter();
+import React from 'react'
 
-  const handleNavigation = () => {
-    // Navigate to the /category page
-    router.push('/category');
-  };
+export default function DropDownMenu({ category }) {
+  if (!category || !category.subCategories) return null
+  console.log("this is drop down ",category)
+  const SaleBadge = ({ type = 'default' }) => {
+    const styles = {
+      default: 'bg-pink-500 text-white',
+      black: 'bg-black text-white',
+      blue: 'bg-cyan-400 text-white'
+    }
+
+    return (
+      <span className={`ml-2 px-1.5 py-0.5 text-[10px] font-medium rounded ${styles[type]}`}>
+        SALE
+      </span>
+    )
+  }
 
   return (
-    <div className='relative  w-full'> 
-      <div className="absolute z-10  mt-2 bg-white shadow-lg w-2/3 ">
-      <div className="container mx-auto">
-        <div className='border-b border-slate-200 p-10'>
-        <div className="grid grid-cols-4 gap-8">
-          <div>
-            <h3 className="font-semibold text-sm mb-3">Action Figures & Collectibles</h3>
-            <ul className="space-y-2">
-              <li><a href="#" className="text-gray-600 hover:text-gray-900" onClick={handleNavigation}>Jackets</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900 font-semibold" onClick={handleNavigation}>Dresses <span className="text-red-500 text-xs">SALE</span></a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900" onClick={handleNavigation}>Cardigans & Pullovers</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900" onClick={handleNavigation}>Skirts</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900" onClick={handleNavigation}>Pants & Shorts</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900" onClick={handleNavigation}>Outerwear</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900" onClick={handleNavigation}>Swimwear</a></li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-semibold text-sm mb-3">Art Craft & Hobby Kits</h3>
-            <ul className="space-y-2">
-              <li><a href="#" className="text-gray-600 hover:text-gray-900" onClick={handleNavigation}>Jackets</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900 font-semibold" onClick={handleNavigation}>Dresses <span className="text-red-500 text-xs">SALE</span></a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900" onClick={handleNavigation}>Cardigans & Pullovers</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900" onClick={handleNavigation}>Skirts</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900" onClick={handleNavigation}>Pants & Shorts</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900" onClick={handleNavigation}>Outerwear</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900" onClick={handleNavigation}>Swimwear</a></li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-semibold text-sm mb-3">Kids Gadgets</h3>
-            <ul className="space-y-2">
-              <li><a href="#" className="text-gray-600 hover:text-gray-900" onClick={handleNavigation}>Jackets</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900" onClick={handleNavigation}>Dresses</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900" onClick={handleNavigation}>Blouses & Tops</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900" onClick={handleNavigation}>Cardigans & Pullovers</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900 font-semibold" onClick={handleNavigation}>Skirts <span className="text-red-500 text-xs">SALE</span></a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900" onClick={handleNavigation}>Pants & Shorts</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900" onClick={handleNavigation}>Outerwear</a></li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-semibold text-sm mb-3">Remote Control Toys</h3>
-            <ul className="space-y-2">
-              <li><a href="#" className="text-gray-600 hover:text-gray-900" onClick={handleNavigation}>Jackets</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900" onClick={handleNavigation}>Dresses</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900">Blouses & Tops</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900" onClick={handleNavigation}>Cardigans & Pullovers</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900 font-semibold" onClick={handleNavigation}>Skirts <span className="text-red-500 text-xs">SALE</span></a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900" onClick={handleNavigation}>Pants & Shorts</a></li>
-              <li><a href="#" className="text-gray-600 hover:text-gray-900" onClick={handleNavigation}>Outerwear</a></li>
-            </ul>
-          </div>
-          <div>
-          <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-srcset="images/32306.webp" class="fade-up lazyloaded" alt="" srcset="images/32306.webp"/>
-          </div>
+    <div className="w-full bg-white">
+      <div className="container mx-auto px-4 py-6">
+        <div className="grid grid-cols-4 gap-x-12">
+          {category.subCategories.map((subCategory, index) => (
+            <div key={subCategory?._id} className="space-y-4">
+              <a className="text-gray-700 hover:text-teal-300 font-medium text-base"  href={`https://www.gezeno.com/category/${subCategory?._id}`} >
+                {subCategory.name}
+              </a>
+              <ul className="space-y-3">
+                {subCategory.subSubCategories &&
+                  subCategory.subSubCategories.map((subSubCategory, id) => (
+                    <li key={subSubCategory?.name}>
+                      <a 
+                        href={`https://www.gezeno.com/category/${subSubCategory?._id}`} 
+                        className="inline-flex items-center text-gray-500 hover:text-teal-400 hover:underline text-[15px] font-normal"
+                      >
+                        {subSubCategory?.name}
+                      </a>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          ))}
         </div>
-        </div>
-        <div className="mt-6 flex justify-center p-5 pb-4">
-          
-          <a href="#" className=" hover:text-slate-800" onClick={handleNavigation}>View All Toys & Games →</a>
+        <div className="mt-8 flex justify-center">
+          <a 
+             href={`https://www.gezeno.com/category/${category?._id}`} 
+            className="inline-flex items-center text-gray-600 hover:text-teal-400 text-lg font-medium"
+          >
+            View All {category.name}
+            <svg 
+              className="ml-2 w-4 h-4" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M9 5l7 7-7 7" 
+              />
+            </svg>
+          </a>
         </div>
       </div>
     </div>
+  )
+}
 
-
-    </div>
-      );
-};
-
-export default DropDownMenu;

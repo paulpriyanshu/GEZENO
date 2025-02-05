@@ -29,6 +29,22 @@
 .custom-dot-list-style button.active {
   background-color: white ;
 }
+/* Add these styles to your global CSS file */
+.sticky {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  height: fit-content;
+  max-height: 100vh;
+}
+
+@media (max-width: 768px) {
+  .sticky {
+    position: relative;
+  }
+}
+
+
 
 .container {
   max-width: 1200px; /* Set a max width for the navbar */
@@ -44,6 +60,7 @@
     opacity: 1;
   }
 }
+
 
 .lift-up {
   animation: liftUp 1s ease-out forwards;

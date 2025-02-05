@@ -32,7 +32,7 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"
-  ],
+, "app/admin/categories/page.jsx", "app/utils/detectIOS.js", "components/ZoomableImage.jsx", "app/offers/page.jsx"  ],
   "exclude": [
     "node_modules"
   ]

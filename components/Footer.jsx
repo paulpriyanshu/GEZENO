@@ -7,32 +7,45 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           {/* Logo */}
           <div className="col-span-1 sm:col-span-2 lg:col-span-4 mb-6 ">
-            <img src="logo.webp" alt="Gezeno Logo" className="h-12 bg-white rounded-lg" />
+            <img src="/logo.webp" alt="Gezeno Logo" className="h-12 bg-white rounded-lg" />
           </div>
-          
-          {/* Customer Service */}
           <div>
-            <h3 className="text-teal-300 font-semibold mb-4">CUSTOMER SERVICE</h3>
-            <ul className="space-y-2">
-              {['Contact Us', 'Track Order', 'Returns Order', 'Cancel Order'].map((item) => (
-                <li key={item}><a href="#" className="hover:text-teal-300">{item}</a></li>
-              ))}
-            </ul>
-            <div className="mt-4 text-sm text-gray-400">
-              <p>15 Days return policy*</p>
-              <p>Cash on delivery*</p>
-            </div>
-          </div>
-          
-          {/* Company */}
-          <div>
-            <h3 className="text-teal-300 font-semibold mb-4">COMPANY</h3>
-            <ul className="space-y-2">
-              {['About Us', "We're Hiring", 'Terms & Conditions', 'Privacy Policy', 'Blog'].map((item) => (
-                <li key={item}><a href="#" className="hover:text-teal-300">{item}</a></li>
-              ))}
-            </ul>
-          </div>
+  <h3 className="text-teal-300 font-semibold mb-4">CUSTOMER SERVICE</h3>
+  <ul className="space-y-2">
+    {[
+      { name: 'Contact Us', href: '/contact-us' },
+      { name: 'Track Order', href: '/track-order' },
+      { name: 'Returns Order', href: '/returns' },
+      { name: 'Cancel Order', href: '/cancellations' },
+    ].map((item) => (
+      <li key={item.name}>
+        <a href={item.href} className="hover:text-teal-300">{item.name}</a>
+      </li>
+    ))}
+  </ul>
+  <div className="mt-4 text-sm text-gray-400">
+    <p>15 Days return policy*</p>
+    <p>Cash on delivery*</p>
+  </div>
+</div>
+
+{/* Company */}
+<div>
+  <h3 className="text-teal-300 font-semibold mb-4">COMPANY</h3>
+  <ul className="space-y-2">
+    {[
+      { name: 'About Us', href: '/about-us' },
+      { name: "We're Hiring", href: '/we-re-hiring' },
+      { name: 'Terms & Conditions', href: '/terms&conditions' },
+      { name: 'Privacy Policy', href: '/privacy' },
+      { name: 'Blog', href: '/blog' },
+    ].map((item) => (
+      <li key={item.name}>
+        <a href={item.href} className="hover:text-teal-300">{item.name}</a>
+      </li>
+    ))}
+  </ul>
+</div>
           
           {/* Connect with Us */}
           <div>

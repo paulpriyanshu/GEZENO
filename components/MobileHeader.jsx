@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+"use client"
+import React, { useEffect, useState } from 'react';
 import Link from "next/link";
 import {
   ChevronLeft,
@@ -9,17 +10,18 @@ import {
 } from "lucide-react";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
+// import { arrayBuffer } from 'stream/consumers';
 
 const initialFilterItems = [
-  { name: "T-Shirts", hasDropdown: false },
-  { name: "Size", hasDropdown: true },
-  { name: "Top Rated", hasDropdown: false },
-  { name: "Regular Fit", hasDropdown: false },
-  { name: "Graphics", hasDropdown: false },
-  { name: "Half Sleeves", hasDropdown: false },
-  { name: "Long Sleeves", hasDropdown: false },
-  { name: "Solids", hasDropdown: false },
-  { name: "Color", hasDropdown: true },
+   "T-Shirts" ,
+   "Size",
+   "Top Rated" ,
+   "Regular Fit" ,
+   "Graphics" ,
+   "Half Sleeves" ,
+   "Long Sleeves" ,
+   "Solids" ,
+   "Color",
 ];
 
 const responsive = {
@@ -40,9 +42,27 @@ const responsive = {
   },
 };
 
-export default function Header() {
-  const [filterItems, setFilterItems] = useState(initialFilterItems.map(item => ({...item, active: false})));
 
+export default function Header({filters}) {
+  // const [filterItems, setFilterItems] = useState(initialFilterItems.map(item => ({...item, active: false})));
+  const [filterArray,setFilterArray]=useState([])
+  function concatenateArrays(obj) {
+    const result = [];
+    
+    for (const key in obj) {
+      if (Array.isArray(obj[key])) {
+        // Concatenate the array value into the result
+        result.push(...obj[key]);
+      }
+    }
+    
+    return result;
+  }
+  useEffect(()=>{
+    setFilterArray(concatenateArrays(filters))
+    // console.log("this is the array",array)
+  },[])
+ 
   const toggleActive = (index) => {
     setFilterItems(prevItems => 
       prevItems.map((item, i) => 
@@ -77,16 +97,16 @@ export default function Header() {
         removeArrowOnDeviceType={["tablet", "mobile"]}
         itemClass="px-1"
       >
-        {filterItems.map((item, index) => (
+        {filterArray?.map((item, index) => (
           <button
-            key={item.name}
+            key={item}
             onClick={() => toggleActive(index)}
             className={`px-2 py-1 text-[10px] sm:text-xs font-semibold border border-slate-300 rounded-full whitespace-nowrap flex items-center justify-center w-full ${
               item.active ? "bg-black text-white" : "bg-white text-black"
             }`}
           >
-            <span className="truncate">{item.name}</span>
-            {item.hasDropdown && <ChevronDown className="w-3 h-3 ml-1 flex-shrink-0" />}
+            <span className="truncate">{item}</span>
+            {/* {item.hasDropdown && <ChevronDown className="w-3 h-3 ml-1 flex-shrink-0" />} */}
           </button>
         ))}
       </Carousel>

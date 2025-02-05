@@ -14,9 +14,7 @@ export default function TopHeader() {
           <Link href="/download-app" className="hover:text-gray-900 transition-colors">
             Download App
           </Link>
-          <Link href="/tribe-membership" className="hover:text-gray-900 transition-colors">
-            Tribe Membership
-          </Link>
+        
         </nav>
         <nav className="flex space-x-4">
           <Link href="/contact-us" className="hover:text-gray-900 transition-colors">

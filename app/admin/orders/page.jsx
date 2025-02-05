@@ -1,7 +1,7 @@
 "use client"
 import React from 'react'
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Input } from "@/components/ui/Input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Home, Package, Users, FileText, PieChart, Mail, Tag, Settings, Menu, Search, MoreHorizontal } from 'lucide-react'
