@@ -4,7 +4,7 @@ import React from 'react'
 
 export default function DropDownMenu({ category }) {
   if (!category || !category.subCategories) return null
-  console.log("this is drop down ",category)
+  // console.log("this is drop down ",category)
   const SaleBadge = ({ type = 'default' }) => {
     const styles = {
       default: 'bg-pink-500 text-white',

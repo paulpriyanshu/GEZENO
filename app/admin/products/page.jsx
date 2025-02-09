@@ -96,13 +96,13 @@ export default function ProductManagement() {
           axios.get('https://backend.gezeno.in/api/filters'),
           axios.get('https://backend.gezeno.in/api/sizes')
         ])
-        console.log("this is product res data",productsRes.data)
+        // console.log("this is product res data",productsRes.data)
         setProducts(productsRes.data)
         setFilteredProducts(productsRes.data)
         setCategories(categoriesRes.data)
         setBrands(brandsRes.data.data)
         setFilters(filtersRes.data.filters)
-        console.log("these are the filters",filtersRes.data.filters)
+        // console.log("these are the filters",filtersRes.data.filters)
         setTags(filtersRes.data.filters)
         setSizes(sizesRes.data.sizes)
       } catch (error) {

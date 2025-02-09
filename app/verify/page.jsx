@@ -29,11 +29,11 @@ function Page() {
   const handleOtpClick = async () => {
     setLoading(true) // Show loading state
     try {
-      console.log("this email has been set", email)
+      // console.log("this email has been set", email)
       const response = await axios.post('https://backend.gezeno.in/api/verify-otp', { email, otp })
 
       if (response.data.success) {
-        console.log('Logged in successfully:', response.data)
+        // console.log('Logged in successfully:', response.data)
         const token = response.data.token
         localStorage.setItem('token', token)
         Cookies.set('authToken', token, { expires: 7, secure: true, sameSite: 'Strict', path: '/' })

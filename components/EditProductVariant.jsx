@@ -47,8 +47,8 @@ export default function EditProductVariant({ variantId, productId }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log("this is variant id", variantId)
-        console.log("this is product id", productId)
+        // console.log("this is variant id", variantId)
+        // console.log("this is product id", productId)
         const [productsResponse, variantResponse,productResponse] = await Promise.all([
           axios.get('https://backend.gezeno.in/api/getProducts'),
           axios.get(`https://backend.gezeno.in/api/get-product-variant/${variantId}`),

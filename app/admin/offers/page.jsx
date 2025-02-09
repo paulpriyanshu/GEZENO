@@ -93,7 +93,7 @@ export default function OffersPage() {
           formData.append(key, offerData[key]);
         }
       }
-      console.log("this is editing",id)
+      // console.log("this is editing",id)
       await axios.post(`https://backend.gezeno.in/api/editOffers/${id}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });

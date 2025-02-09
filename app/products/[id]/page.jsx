@@ -24,10 +24,9 @@ async function getRelatedProducts(category) {
 // }
 
 async function getHomeConfig() {
-  const res = await axios.get("https://backend.gezeno.in/api/home/headers", {
-    cache: "no-store",
+  const res = await fetch("https://backend.gezeno.in/api/home/headers", {
   })
-  return res
+  return res.json()
 }
 
 export default async function ProductPage({ params }) {

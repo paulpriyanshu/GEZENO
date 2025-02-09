@@ -83,7 +83,7 @@ export default function HomePageEditor() {
       setAvailableCategories(categories)
 
       const homeData = homeDataResponse.data.data
-      console.log("this is home data",homeDataResponse.data.data)
+      // console.log("this is home data",homeDataResponse.data.data)
       const updatedCarousel = homeData.carousel.map(item => ({
         ...item,
         categoryName: item.categoryData?.name || "Unknown",
@@ -191,7 +191,7 @@ export default function HomePageEditor() {
 
   const fetchSubSubcategories = async (subcategoryId, stateKey) => {
     try {
-      console.log("fetching subsubcategories",subcategoryId)
+      // console.log("fetching subsubcategories",subcategoryId)
       const response = await axios.get(`https://backend.gezeno.in/api/getsubsubcategories/${subcategoryId}`)
       setSubSubcategories(prev => ({ ...prev, [stateKey]: response.data }))
     } catch (error) {
@@ -262,8 +262,8 @@ export default function HomePageEditor() {
       //   addCustomSection()
 
       // }
-      console.log(endpoint)
-      console.log(categoryToAdd)
+      // console.log(endpoint)
+      // console.log(categoryToAdd)
       const response = await axios.post(`https://backend.gezeno.in/api/${endpoint}`, {
         categoryId: categoryToAdd
       })
