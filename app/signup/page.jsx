@@ -70,7 +70,7 @@ function Page() {
       <div className="w-full md:w-2/3 lg:w-1/3 bg-white rounded-lg shadow-lg p-6 md:p-10">
         <h1 className="text-3xl font-bold font-sans mb-6 text-center md:text-left">Sign Up</h1>
         <p className="text-lg md:text-xl font-semibold text-gray-600 font-sans text-center mb-8">
-          Hi new buddy, let&apos;s get you started with the bewakoofi!
+          Hi new buddy, let&apos;s get you started with the Gezeno!
         </p>
         <InputField label="Name" onChange={(e) => setName(e.target.value)} />
         <InputField label="Mobile" value={number} onChange={(e) => setNumber(e.target.value)} />

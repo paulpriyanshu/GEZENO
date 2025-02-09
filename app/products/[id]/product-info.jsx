@@ -301,7 +301,7 @@ export default function ProductInfo({ product }) {
                 </div>
                 <div>
                   <span className="font-semibold">Manufactured By - </span>
-                  Bewakoof Brands Pvt Ltd
+                  Gezeno Brands Pvt Ltd
                 </div>
                 <div>
                   <h4 className="text-lg font-medium text-primary mb-2">Product Specifications</h4>

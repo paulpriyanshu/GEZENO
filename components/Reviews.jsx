@@ -163,7 +163,7 @@ export default function Reviews({
               </div>
             </div>
             <div className="flex items-center justify-between text-gray-600">
-              <span>Bewakoof Fans</span>
+              <span>Gezeno Fans</span>
               <div className="flex items-center gap-2">
                 <span>4244 people found this helpful</span>
                 <ThumbsUpIcon className="w-5 h-5" />
