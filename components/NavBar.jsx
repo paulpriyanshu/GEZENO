@@ -98,7 +98,7 @@ export default function NavBar({ data }) {
                   onMouseLeave={handleMouseLeave}
                 >
                   <a
-                    href={`https://gezeno.in/category/${category.categoryId._id}`}
+                    href={`https://gezeno.in/category/${category.categoryId.name}/${category.categoryId._id}`}
                     className="text-gray-700 hover:text-gray-900 text-xs font-medium px-4 py-6 block"
                   >
                     {category.categoryId.name.toUpperCase()}
