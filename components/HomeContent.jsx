@@ -373,7 +373,7 @@ export default function HomeContent({ homeConfigData, submenuData, headersData }
                   const redirectUrl =
                     items.redirectUrl.startsWith("http://") || items.redirectUrl.startsWith("https://")
                       ? items.redirectUrl
-                      : `https://www.gezeno.com${items.redirectUrl.startsWith("/") ? "" : "/"}${items.redirectUrl}`
+                      : `https://gezeno.in${items.redirectUrl.startsWith("/") ? "" : "/"}${items.redirectUrl}`
 
                   window.location.href = redirectUrl
                 }}

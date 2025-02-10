@@ -25,7 +25,7 @@ export default function DropDownMenu({ category }) {
         <div className="grid grid-cols-4 gap-x-12">
           {category.subCategories.map((subCategory, index) => (
             <div key={subCategory?._id} className="space-y-4">
-              <a className="text-gray-700 hover:text-teal-300 font-medium text-base"  href={`https://www.gezeno.com/category/${subCategory?._id}`} >
+              <a className="text-gray-700 hover:text-teal-300 font-medium text-base"  href={`https://gezeno.in/category/${encodeURIComponent(subCategory.name)}/${subCategory?._id}`} >
                 {subCategory.name}
               </a>
               <ul className="space-y-3">
@@ -33,7 +33,7 @@ export default function DropDownMenu({ category }) {
                   subCategory.subSubCategories.map((subSubCategory, id) => (
                     <li key={subSubCategory?.name}>
                       <a 
-                        href={`https://www.gezeno.com/category/${subSubCategory?._id}`} 
+                        href={`https://gezeno.in/category/${encodeURIComponent(subSubCategory.name)}/${subSubCategory?._id}`} 
                         className="inline-flex items-center text-gray-500 hover:text-teal-400 hover:underline text-[15px] font-normal"
                       >
                         {subSubCategory?.name}
@@ -46,7 +46,7 @@ export default function DropDownMenu({ category }) {
         </div>
         <div className="mt-8 flex justify-center">
           <a 
-             href={`https://www.gezeno.com/category/${category?._id}`} 
+             href={`https://gezeno.in/category/${category.name}/${category?._id}`} 
             className="inline-flex items-center text-gray-600 hover:text-teal-400 text-lg font-medium"
           >
             View All {category.name}
