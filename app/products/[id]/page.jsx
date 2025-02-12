@@ -7,16 +7,19 @@ import RelatedProducts from "./related-products"
 import axios from "axios"
 
 async function getProduct(id) {
-  const res = await fetch(`https://backend.gezeno.in/api/products/${id}`)
+  const res = await fetch(`https://backend.gezeno.in/api/products/${id}`,{
+    next:{revalidate: 5},
+    cache: 'no-store'
+  })
   if (!res.ok) throw new Error("Failed to fetch product")
   return res.json()
 }
 
 async function getRelatedProducts(category) {
-  const res = await axios.get(`https://backend.gezeno.in/api/productOfCategory/${category}`)
+  const res = await fetch(`https://backend.gezeno.in/api/productOfCategory/${category}`)
 
     console.log("category",res.data)
-  return res.data
+  return res.json()
 }
 
 // async function getCategoryName(category){
@@ -24,8 +27,7 @@ async function getRelatedProducts(category) {
 // }
 
 async function getHomeConfig() {
-  const res = await fetch("https://backend.gezeno.in/api/home/headers", {
-  })
+  const res = await fetch("https://backend.gezeno.in/api/home/headers")
   return res.json()
 }
 
@@ -41,7 +43,7 @@ export default async function ProductPage({ params }) {
   return (
     <div className="mx-auto md:mx-10">
       {/* Pass preloaded home config data to Header */}
-      <Header homeconfig={homeconfig.data} />
+      <Header homeconfig={homeconfig} />
 
       <div className="px-4 md:px-6 lg:px-8 py-4 md:py-6">
         {/* Breadcrumb */}

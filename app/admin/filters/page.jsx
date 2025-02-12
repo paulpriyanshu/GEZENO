@@ -101,7 +101,7 @@ export default function Component() {
       toast.error("Please fill in all tags or remove empty ones")
       return
     }
-
+    console.log("filters", section.tags.filter(tag => tag.trim()))
     try {
       const response = await axios.post('https://backend.gezeno.in/api/filters', {
         name: section.name,
@@ -164,7 +164,7 @@ export default function Component() {
       const response = await axios.post(`https://backend.gezeno.in/api/editfilters/${editingFilter._id}`, {
         name: editingFilter.name,
         tags: editingFilter.tags.filter(tag => tag.trim()),
-        removeTags: removedTags
+        // removeTags: removedTags
       })
 
       if (response.data.success) {
@@ -182,7 +182,7 @@ export default function Component() {
 
   const deleteFilter = async (filterId) => {
     try {
-      await axios.delete(`https://backend.gezeno.in/api/filters/${filterId}`)
+      await axios.post(`https://backend.gezeno.in/api/filters/${filterId}`)
       toast.success("Filter deleted successfully")
       fetchExistingFilters()
       closeEditModal()

@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Heart, MapPin, Plus, ShoppingBag, Star, FileText, RotateCcw } from "lucide-react"
 import { motion } from "framer-motion"
+import { useRouter, useSearchParams } from "next/navigation"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -18,6 +19,8 @@ const dropdownVariants = {
 }
 
 export default function ProductInfo({ product }) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [selectedSize, setSelectedSize] = useState("")
   const [isDescriptionOpen, setIsDescriptionOpen] = useState(false)
   const [pincode, setPincode] = useState("")
@@ -25,6 +28,7 @@ export default function ProductInfo({ product }) {
   const [isOffersOpen, setIsOffersOpen] = useState(false)
   const [selectedFilters, setSelectedFilters] = useState({})
   const [selectedVariant, setSelectedVariant] = useState(null)
+  const [allFilters, setAllFilters] = useState({})
   const [productIds, setProductIds] = useState(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("cart")
@@ -32,21 +36,107 @@ export default function ProductInfo({ product }) {
     }
     return []
   })
+  console.log("product", product)
 
-  const handleFilterChange = (filterName, tag) => {
-    setSelectedFilters((prev) => {
-      const updatedFilters = { ...prev }
-      if (!updatedFilters[filterName]) {
-        updatedFilters[filterName] = []
-      }
-      const index = updatedFilters[filterName].indexOf(tag)
-      if (index > -1) {
-        updatedFilters[filterName].splice(index, 1)
-      } else {
-        updatedFilters[filterName].push(tag)
-      }
-      return updatedFilters
+  useEffect(() => {
+    const filters = {}
+    const addFilters = (item) => {
+      item.filters?.forEach((filter) => {
+        if (!filters[filter.filter.name]) {
+          filters[filter.filter.name] = new Map() // Using Map to store product ID with each tag
+        }
+        filter.tags.forEach((tag) => {
+          if (!filters[filter.filter.name].has(tag)) {
+            filters[filter.filter.name].set(tag, item._id)
+          }
+        })
+      })
+    }
+
+    // Add filters from current product
+    addFilters(product)
+
+    if (product.parentProduct) {
+      // If parent product exists, add filters from parent and its variants
+      addFilters(product.parentProduct)
+      product.parentProduct.variants?.forEach(addFilters)
+    } else {
+      // If no parent product, add filters from variants of current product
+      product.variants?.forEach(addFilters)
+    }
+
+    // Convert Map to array and format for rendering
+    const formattedFilters = {}
+    Object.entries(filters).forEach(([filterName, tagMap]) => {
+      formattedFilters[filterName] = Array.from(tagMap).map(([tag, productId]) => ({
+        tag,
+        productId,
+      }))
     })
+
+    setAllFilters(formattedFilters)
+
+    // Set initial selected filters based on URL params
+    const initialFilters = {}
+    searchParams.forEach((value, key) => {
+      initialFilters[key] = value.split(",")
+    })
+    setSelectedFilters(initialFilters)
+
+    // Set initial selected variant based on URL params
+    const variantId = searchParams.get("variant")
+    if (variantId) {
+      setSelectedVariant(variantId)
+    }
+  }, [product, searchParams])
+
+  const handleFilterChange = (filterName, tag, productId) => {
+    setSelectedFilters((prev) => {
+      const newFilters = { ...prev }
+      if (!newFilters[filterName]) {
+        newFilters[filterName] = []
+      }
+      const index = newFilters[filterName].indexOf(tag)
+      if (index > -1) {
+        newFilters[filterName].splice(index, 1)
+      } else {
+        newFilters[filterName].push(tag)
+      }
+
+      // Route to the appropriate product page
+      if (productId) {
+        // If it's a variant and there's no parent product, use /products/ path
+        if (!product.parentProduct && product.variants?.some((v) => v._id === productId)) {
+          router.push(`/products/${productId}`)
+        } else {
+          // If there's a parent product or it's not a variant, use /product/ path
+          router.push(`/products/${productId}`)
+        }
+      }
+
+      return newFilters
+    })
+  }
+
+  const findMatchingItem = (filters) => {
+    const matchesFilters = (item) => {
+      return Object.entries(filters).every(([filterName, selectedTags]) => {
+        return item.filters.some(
+          (filter) => filter.filter.name === filterName && selectedTags.every((tag) => filter.tags.includes(tag)),
+        )
+      })
+    }
+
+    if (matchesFilters(product)) {
+      return product
+    }
+
+    return product.variants.find(matchesFilters)
+  }
+
+  const handleVariantSelect = (variantId) => {
+    setSelectedVariant(variantId)
+    router.push(`/products/${variantId}`)
   }
 
   const handleAddToBag = () => {
@@ -58,6 +148,19 @@ export default function ProductInfo({ product }) {
     } catch (error) {
       toast.error("Error adding product to bag")
     }
+  }
+
+  const isFilterSelected = (filterName, tag) => {
+    // Check if it's in selected filters
+    if (selectedFilters[filterName]?.includes(tag)) {
+      return true
+    }
+    // Check if it matches current product's filters
+    return product.filters?.some((filter) => filter.filter.name === filterName && filter.tags.includes(tag))
+  }
+
+  const isVariantSelected = (variantId) => {
+    return selectedVariant === variantId
   }
 
   return (
@@ -72,30 +175,67 @@ export default function ProductInfo({ product }) {
           {[1, 2, 3, 4, 5].map((star) => (
             <Star
               key={star}
-              className={cn("w-4 h-4", star <= 4.5 ? "fill-primary text-primary" : "fill-muted text-muted-foreground")}
+              className={cn(
+                "w-4 h-4",
+                star <= product.rating ? "fill-primary text-primary" : "fill-muted text-muted-foreground",
+              )}
             />
           ))}
         </div>
-        <span className="text-sm">4.5</span>
+        <span className="text-sm">{product.rating}</span>
       </div>
 
       <div className="flex items-center gap-4">
         <span className="text-3xl font-bold">₹{product.price}</span>
-        <span className="text-muted-foreground line-through">₹2,649</span>
-        <Badge variant="secondary" className="text-green-600">
-          50% OFF
-        </Badge>
+        {product.discountedPrice && (
+          <>
+            <span className="text-muted-foreground line-through">₹{product.discountedPrice}</span>
+            <Badge variant="secondary" className="text-green-600">
+              {Math.round((1 - product.price / product.discountedPrice) * 100)}% OFF
+            </Badge>
+          </>
+        )}
       </div>
 
       <p className="text-sm text-muted-foreground">inclusive of all taxes</p>
 
-      <div className="flex gap-2">
-        <Badge variant="secondary">OVERSIZED FIT</Badge>
-        <Badge variant="secondary">PREMIUM BLENDED FABRIC</Badge>
+      {/* Filters Section */}
+      <div>
+        <h3 className="text-xl font-semibold mb-4">Filters</h3>
+        {Object.entries(allFilters).map(([filterName, tags]) => (
+          <div key={filterName} className="mb-4">
+            <h4 className="font-medium mb-2">{filterName}</h4>
+            <div className="flex flex-wrap gap-2">
+              {tags.map(({ tag, productId }) => (
+                <Button
+                  key={`${filterName}-${tag}`}
+                  variant="outline"
+                  className={cn(
+                    "px-4 h-10",
+                    isFilterSelected(filterName, tag) && "border-primary bg-primary/5",
+                    filterName.toLowerCase() === "color" && "relative pl-10",
+                  )}
+                  onClick={() => handleFilterChange(filterName, tag, productId)}
+                >
+                  {filterName.toLowerCase() === "color" && (
+                    <span
+                      className="absolute left-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full border"
+                      style={{
+                        backgroundColor: tag.toLowerCase(),
+                        borderColor: tag.toLowerCase() === "white" ? "#e5e7eb" : tag.toLowerCase(),
+                      }}
+                    />
+                  )}
+                  {tag}
+                </Button>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Size Section */}
-      {product.sizes && product.sizes?.length > 0 && product.sizes[0]?.tags?.length > 0 && (
+      {product.sizes && product.sizes.length > 0 && (
         <div>
           <div className="flex justify-between items-center mb-2">
             <span className="font-medium">Select Size</span>
@@ -104,95 +244,30 @@ export default function ProductInfo({ product }) {
             </Button>
           </div>
           <div className="flex flex-wrap gap-2">
-            {[...new Set(product.sizes[0].tags)].map((size) => (
+            {product.sizes[0].tags.map((size) => (
               <Button
                 key={size}
                 variant="outline"
-                className={cn("h-12 w-12", selectedSize === size && "border-primary bg-primary/5")}
+                className={cn(
+                  "h-12 w-12",
+                  selectedSize === size && "border-primary bg-primary/5"
+                )}
                 onClick={() => setSelectedSize(size)}
               >
                 {size}
               </Button>
             ))}
           </div>
+          {selectedSize && (
+            <p className="mt-2 text-sm text-muted-foreground">
+              Selected size: {selectedSize}
+            </p>
+          )}
         </div>
       )}
 
-      {/* Filters Section */}
-      {product.filters && product.filters?.length > 0 && (
-        <div>
-          {product.filters.map((filterGroup) => {
-            const distinctTags = [...new Set(filterGroup.tags)]
-            return (
-              <div key={filterGroup.filter._id}>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="font-medium">{filterGroup.filter.name}</span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {distinctTags.map((tag) => (
-                    <Button
-                      key={tag}
-                      variant="outline"
-                      className={cn(
-                        "px-4 h-12",
-                        selectedFilters[filterGroup.filter.name]?.includes(tag) && "border-primary bg-primary/5",
-                        filterGroup.filter.name === "Color" && "relative pl-10",
-                      )}
-                      onClick={() => handleFilterChange(filterGroup.filter.name, tag)}
-                    >
-                      {filterGroup.filter.name === "Color" && (
-                        <span
-                          className="absolute left-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full border"
-                          style={{
-                            backgroundColor: tag.toLowerCase(),
-                            borderColor: tag.toLowerCase() === "white" ? "#e5e7eb" : tag.toLowerCase(),
-                          }}
-                        />
-                      )}
-                      {tag}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
 
-      {/* Variants Section */}
-      {product.variants && product.variants?.length > 0 && (
-        <div>
-          <div className="flex justify-between items-center mb-2">
-            <span className="font-medium">Select Variant</span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {[...new Set(product.variants.map((v) => v.variantName))].map((variantName) => {
-              const variant = product.variants.find((v) => v.variantName === variantName)
-              return (
-                <Button
-                  key={variant._id}
-                  variant="outline"
-                  className={cn(
-                    "px-4 h-12 relative group",
-                    selectedVariant === variant._id && "border-primary bg-primary/5",
-                  )}
-                  onClick={() => setSelectedVariant(selectedVariant === variant._id ? null : variant._id)}
-                >
-                  <span className="overflow-hidden text-ellipsis whitespace-nowrap max-w-[150px]">
-                    {variantName?.length > 20 ? `${variantName.slice(0, 70)}...` : variantName}
-                  </span>
-
-                  <div className="absolute left-0 top-full mt-2 hidden group-hover:flex items-center">
-                    <span className="bg-gray-400 text-white text-sm rounded px-2 py-1">
-                      {variantName?.slice(0, 100)}
-                    </span>
-                  </div>
-                </Button>
-              )
-            })}
-          </div>
-        </div>
-      )}
+      
 
       <div className="flex gap-4">
         <Button className="flex-1 h-12" onClick={handleAddToBag}>
@@ -232,11 +307,11 @@ export default function ProductInfo({ product }) {
             className="w-full flex items-center justify-between py-4 px-0 hover:bg-transparent"
             onClick={() => setIsOffersOpen(!isOffersOpen)}
           >
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
               <Star className="w-6 h-6" />
               <div className="text-left">
                 <div className="font-bold text-xl">Offers</div>
-                <div className="text-muted-foreground text-lg">Save Extra With 2 Offers</div>
+                <div className="text-muted-foreground text-lg">Save Extra With Offers</div>
               </div>
             </div>
             <Plus className={cn("h-5 w-5 transition-transform", isOffersOpen && "rotate-45")} />
@@ -269,13 +344,13 @@ export default function ProductInfo({ product }) {
         </div>
 
         {/* Description Section */}
-        <div className="border-b p-5">
+        <div className="border-b p-4">
           <Button
             variant="ghost"
             className="w-full flex items-center justify-between py-4 px-0 hover:bg-transparent"
             onClick={() => setIsDescriptionOpen(!isDescriptionOpen)}
           >
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
               <FileText className="w-6 h-6" />
               <div className="text-left">
                 <div className="font-bold text-xl">Product Description</div>
@@ -293,22 +368,18 @@ export default function ProductInfo({ product }) {
               transition={{ duration: 0.5 }}
               className="py-4 space-y-6 text-lg"
             >
-              {/* Description content */}
               <div className="space-y-4">
                 <div>
                   <span className="font-semibold">Country of Origin - </span>
-                  India
+                  {product.countryOfOrigin || "Not specified"}
                 </div>
                 <div>
                   <span className="font-semibold">Manufactured By - </span>
-                  Gezeno Brands Pvt Ltd
+                  {product.manufacturer || "Not specified"}
                 </div>
                 <div>
                   <h4 className="text-lg font-medium text-primary mb-2">Product Specifications</h4>
-                  <ul className="list-disc pl-5 space-y-2">
-                    <li>Oversized fit - Super Loose On Body</li>
-                    <li>60% Cotton, 40% Poly - Midweight fleece</li>
-                  </ul>
+                  <p>{product.productSpecs || "No specifications available"}</p>
                 </div>
               </div>
             </motion.div>
@@ -322,11 +393,11 @@ export default function ProductInfo({ product }) {
             className="w-full flex items-center justify-between py-4 px-0 hover:bg-transparent"
             onClick={() => setIsReturnsOpen(!isReturnsOpen)}
           >
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
               <RotateCcw className="w-6 h-6" />
               <div className="text-left">
                 <div className="font-bold text-xl">15 DAY RETURNS</div>
-                <div className="text-muted-foreground text-lg">Know about return & exchange policy</div>
+                <div className="text-muted-foreground text-lg">Return & exchange policy</div>
               </div>
             </div>
             <Plus className={cn("h-5 w-5 transition-transform", isReturnsOpen && "rotate-45")} />
@@ -342,7 +413,7 @@ export default function ProductInfo({ product }) {
             >
               <p>Easy 15 days return and exchange. Return Policies may vary based on products and promotions.</p>
               <ul className="list-disc pl-5 space-y-2">
-                <li>For any query/concern, please write to us at care@bewakoof.com</li>
+                <li>For any query/concern, please write to us at care@example.com</li>
                 <li>Please refer to our return and exchange policy for more details</li>
               </ul>
             </motion.div>
@@ -367,7 +438,8 @@ export default function ProductInfo({ product }) {
             <span className="text-xl">📦</span>
           </div>
           <p className="text-xs text-center text-muted-foreground">
-            EASY RETURNS &<br />
+            EASY RETURNS
+            <br />
             INSTANT REFUNDS
           </p>
         </div>
@@ -385,8 +457,8 @@ export default function ProductInfo({ product }) {
 
       {/* Reviews Section */}
       <Reviews
-        productRating={4.1}
-        totalRatings={143}
+        productRating={product.rating}
+        totalRatings={product.numOfReviews}
         recommendationPercentage={83}
         ratingDistribution={[
           { stars: 5, count: "81", percentage: 75, color: "bg-green-500" },

@@ -171,7 +171,7 @@ export default function ProductManagement() {
     
     if (product.filters && product.filters.length > 0) {
       const selectedFilters = product.filters.map(filter => ({
-        filter: filters.find(f => f._id === filter.filter._id),
+        filter: filters.find(f => f?._id === filter?.filter?._id),
         tags: filter.tags
       }))
       console.log("selected fiulter",selectedFilters)
@@ -182,7 +182,7 @@ export default function ProductManagement() {
 
     if (product.sizes && product.sizes.length>0) {
       const selectedSizes = product.sizes.map(size => ({
-        size: Sizes.find(s => s._id === size.size._id),
+        size: Sizes.find(s => s?._id === size?.size?._id),
         tags: size.tags
       }))
       setCurrentProduct(prev => ({ ...prev, sizes: selectedSizes }))
@@ -295,14 +295,16 @@ export default function ProductManagement() {
   }
 
   const handleSizeTagChange = (selectedSizeId) => {
-    const SizeObject = Sizes.find((size) => size._id === selectedSizeId);
-    if (!SizeObject) return;
-
-    setCurrentProduct(prev => ({
+    const SizeObject = Sizes.find((size) => size._id === selectedSizeId)
+    if (!SizeObject) return
+  
+    setCurrentProduct((prev) => ({
       ...prev,
-      sizes: [...prev.sizes, { size: SizeObject, tags: [] }]
-    }));
-  };
+      sizes: Array.isArray(prev.sizes)
+        ? [...prev.sizes, { size: SizeObject, tags: [] }]
+        : [{ size: SizeObject, tags: [] }],
+    }))
+  }
 
   const handleRemoveImage = (imageIndex) => {
     setCurrentProduct(prev => ({
@@ -798,7 +800,7 @@ export default function ProductManagement() {
                 />
               </div>
               <div>
-                {product.name}
+                {product.name.slice(0,100)} ...
               </div>
             </div>
           </TableCell>
@@ -955,14 +957,14 @@ export default function ProductManagement() {
         </div>
       </ScrollArea>
       <Dialog open={showProductDialog} onOpenChange={setShowProductDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
+        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">  
           <DialogHeader>
             <DialogTitle>{isEditing ? 'Edit Product' : 'Add New Product'}</DialogTitle>
           </DialogHeader>
           <Tabs defaultValue="general" className="flex-grow flex flex-col">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="general">General</TabsTrigger>
-              <TabsTrigger value="variants">Variants</TabsTrigger>
+              {/* <TabsTrigger value="variants">Variants</TabsTrigger> */}
               <TabsTrigger value="description">Description</TabsTrigger>
               <TabsTrigger value="images">Images</TabsTrigger>
               <TabsTrigger value="seo">SEO</TabsTrigger>
@@ -1236,7 +1238,7 @@ export default function ProductManagement() {
                
               </div>
             </TabsContent>
-            <TabsContent value="variants">
+            {/* <TabsContent value="variants">
                   <Card className="w-full">
                     <CardHeader>
                       <CardTitle>VARIANT DETAILS</CardTitle>
@@ -1461,7 +1463,7 @@ export default function ProductManagement() {
                       </Button>
                     </CardContent>
                   </Card>
-                </TabsContent>
+                </TabsContent> */}
                 <TabsContent value="description">
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
