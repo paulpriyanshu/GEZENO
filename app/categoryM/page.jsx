@@ -108,7 +108,7 @@ export default function EcommerceLayout() {
           {!activeSubCategory && (
             <div className="flex flex-col items-center justify-center h-full text-gray-500">
               <p className="text-lg md:text-xl font-semibold mb-2">No categories available</p>
-              <p className="text-xs md:text-base">This subcategory doesn't have any sub-subcategories</p>
+              <p className="text-xs md:text-base">This subcategory doesn &apos; t have any sub-subcategories</p>
             </div>
           )}
           {activeSubCategory && (
