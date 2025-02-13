@@ -2,6 +2,8 @@ import React from "react";
 import { headers } from "next/headers";
 import Sidebar from "./sidebar";
 import NavBar from "@/components/NavBar";
+import MobileFooter from "@/components/MobileFooter";
+import MobileHomeFooter from "@/components/MobileHomeFooter";
 
 async function getNavBarData() {
   try {
@@ -32,6 +34,7 @@ export default async function DashboardLayout({ children }) {
         
         <main className="flex-1 overflow-y-auto p-8">{children}</main>
       </div>
+      <MobileHomeFooter/>
     </div>
     </>
   );
