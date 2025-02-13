@@ -34,7 +34,10 @@ export default async function DashboardLayout({ children }) {
         
         <main className="flex-1 overflow-y-auto p-8">{children}</main>
       </div>
+      <div className="md:hidden">
       <MobileHomeFooter/>
+      </div>
+      
     </div>
     </>
   );
