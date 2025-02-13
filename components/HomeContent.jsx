@@ -51,7 +51,7 @@ function ProductCategory({ products }) {
   )
 }
 
-export default function HomeContent({ homeConfigData, submenuData, headersData }) {
+export default function HomeContent({ homeConfigData, submenuData, headersData,categories }) {
   const [homeConfig, setHomeConfig] = useState({})
   const [slideImages, setSlideImages] = useState([])
   const [bannerImages, setBannerImages] = useState([])
@@ -82,13 +82,15 @@ export default function HomeContent({ homeConfigData, submenuData, headersData }
       setTooHotToBeMissedImages(data.tooHotToBeMissed?.map((item) => item.categoryData).filter(Boolean))
       setOurBestPicksImages(data.ourBestPicks?.map((item) => item.categoryData).filter(Boolean))
       setNavBarData(headersData)
+      // console.log("menu items",categories)
     }
   }, [homeConfigData, submenuData, headersData])
+
 
   return (
     <>
       <div className="min-h-screen w-full">
-        <HomeSideBar isOpen={isOpensidebar} />
+        <HomeSideBar isOpen={isOpensidebar} menuItems={categories} />
         <div className="hidden md:block">
           <TopHeader />
         </div>

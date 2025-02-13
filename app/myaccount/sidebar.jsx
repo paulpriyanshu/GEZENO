@@ -1,4 +1,3 @@
-"use client"
 import Link from "next/link";
 import { Package, CreditCard, Wallet, MapPin, User, LogOut, Hand } from "lucide-react";
 

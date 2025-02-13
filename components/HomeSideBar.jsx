@@ -5,18 +5,19 @@ import { X } from 'lucide-react'
 import { useDispatch } from 'react-redux'
 import { toggleSidebar } from '@/app/lib/store/features/homesidebar/HomeSideBarSlice'
 
-const menuItems = [
-  { name: 'Men', imgSrc: 'https://images.bewakoof.com/nav_menu/Circle-icon-men--1--1684748735.png' },
-  { name: 'Women', imgSrc: 'https://images.bewakoof.com/nav_menu/Circle-icon-women--1--1684748736.png' },
-  { name: 'Accessories', imgSrc: 'https://images.bewakoof.com/nav_menu/Circle-icon-accessories--1--1684748737.png' },
-  { name: 'Bewakoof Sneakers', imgSrc: 'https://images.bewakoof.com/nav_menu/Circle-Nav-168x168-sneaker-1718779684.png' },
-  { name: 'Customize with Google AI', imgSrc: 'https://images.bewakoof.com/nav_menu/Circle-Nav-168x168-googleai-1718944672.png' },
-  { name: 'Shop by Fandom', imgSrc: 'https://images.bewakoof.com/nav_menu/Circle-icon-character-shop--1--1684748738.png' },
-  { name: 'Specials', imgSrc: 'https://images.bewakoof.com/nav_menu/Circle-icon-specials-1684824538.png' },
-  { name: 'Customise your own T-Shirt', imgSrc: 'https://images.bewakoof.com/nav_menu/Circle-icon-customisation--1--1684748736.png' },
-]
+// const menuItems = [
+//   { name: 'Men', imgSrc: 'https://images.bewakoof.com/nav_menu/Circle-icon-men--1--1684748735.png' },
+//   { name: 'Women', imgSrc: 'https://images.bewakoof.com/nav_menu/Circle-icon-women--1--1684748736.png' },
+//   { name: 'Accessories', imgSrc: 'https://images.bewakoof.com/nav_menu/Circle-icon-accessories--1--1684748737.png' },
+//   { name: 'Bewakoof Sneakers', imgSrc: 'https://images.bewakoof.com/nav_menu/Circle-Nav-168x168-sneaker-1718779684.png' },
+//   { name: 'Customize with Google AI', imgSrc: 'https://images.bewakoof.com/nav_menu/Circle-Nav-168x168-googleai-1718944672.png' },
+//   { name: 'Shop by Fandom', imgSrc: 'https://images.bewakoof.com/nav_menu/Circle-icon-character-shop--1--1684748738.png' },
+//   { name: 'Specials', imgSrc: 'https://images.bewakoof.com/nav_menu/Circle-icon-specials-1684824538.png' },
+//   { name: 'Customise your own T-Shirt', imgSrc: 'https://images.bewakoof.com/nav_menu/Circle-icon-customisation--1--1684748736.png' },
+// ]
 
-export default function HomeSideBar({ isOpen }) {
+export default function HomeSideBar({ isOpen,menuItems}) {
+  console.log("menu",menuItems)
   const sidebarRef = useRef(null)
   const dispatch = useDispatch()
 
@@ -59,11 +60,11 @@ export default function HomeSideBar({ isOpen }) {
             <h3 className="font-bold font-sans mt-5 mb-3 text-gray-400">SHOP IN</h3>
             <nav>
               <ul className="space-y-4">
-                {menuItems.map((item, index) => (
+                {menuItems?.map((item, index) => (
                   <li key={index} className="MenuListOption">
-                    <a href="#" className="flex items-center justify-between text-gray-700 hover:text-gray-900 text-sm font-sans font-semibold">
+                    <a href={`https://gezeno.in/category/${encodeURIComponent(item.name)}/${item._id}`} className="flex items-center justify-between text-gray-700 hover:text-gray-900 text-sm font-sans font-semibold">
                       <span>{item.name}</span>
-                      <img src={item.imgSrc} alt={item.name} className="w-5 h-5 navIcon" />
+                      <img src={item.image} alt={item.name} className="w-5 h-5 navIcon rounded-lg"/>
                     </a>
                   </li>
                 ))}

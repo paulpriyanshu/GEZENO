@@ -25,8 +25,11 @@ export default async function DashboardLayout({ children }) {
       </div>
       <div className="flex flex-col min-h-screen bg-gray-50">
       
-      <div className="flex flex-1">
+      <div className="flex flex-1 ">
+        <div className="hidden md:block">
         <Sidebar  pathname={pathname} />
+        </div>
+        
         <main className="flex-1 overflow-y-auto p-8">{children}</main>
       </div>
     </div>
