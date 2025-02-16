@@ -8,6 +8,7 @@ import Loading from "../category/[name]/[id]/loading"
 import NavBar from "@/components/NavBar"
 import axios from "axios"
 import { useRouter } from "next/navigation"
+import Cookie from "js-cookie"
 
 export default function CartPage() {
   const [NavBarData, setNavBarData] = useState([])
@@ -16,6 +17,8 @@ export default function CartPage() {
   const [cartProducts, setCartProducts] = useState([])
   const [cartLoading, setCartLoading] = useState(true)
   const router = useRouter()
+  
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -125,6 +128,17 @@ export default function CartPage() {
   useEffect(() => {
     fetchCartProducts()
   }, [])
+  const onProceed = () => {
+    const user_email = Cookie.get('cred')
+
+    if (!user_email) {
+      router.push('/login')  // Redirect to login if no email is found
+      return
+    }
+
+    router.push('/checkout') // Redirect to checkout if logged in
+  }
+
 
   useEffect(() => {
     if (cartItems.length > 0 && cartProducts.length === 0) {
@@ -187,7 +201,7 @@ export default function CartPage() {
                         <X className="h-5 w-5" />
                       </button>
                       <img
-                        src={product.images[0].url || "/placeholder.svg"}
+                        src={product?.images[0]?.url || "/placeholder.svg"}
                         alt={product.name}
                         className="w-24 md:w-32 h-32 md:h-40 object-cover"
                       />
@@ -346,6 +360,7 @@ export default function CartPage() {
                   <Button
                     className="bg-[#38b2ac] hover:bg-[#319795] text-white px-8 md:px-12 py-6"
                     disabled={cartProducts.length === 0}
+                    onClick={onProceed}
                   >
                     Proceed
                   </Button>
