@@ -32,7 +32,7 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"
-, "app/admin/categories/page.jsx", "app/utils/detectIOS.js", "components/ZoomableImage.jsx", "app/offers/page.jsx", "app/myaccount/myorders/page.jsx", "app/myaccount/myaddress/page.jsx", "app/myaccount/mypayments/page.jsx", "app/myaccount/myprofile/page.jsx", "app/myaccount/mywallet/page.jsx"  ],
+, "app/admin/categories/page.jsx", "app/utils/detectIOS.js", "components/ZoomableImage.jsx", "app/offers/page.jsx", "app/myaccount/myorders/page.jsx", "app/myaccount/myaddress/page.jsx", "app/myaccount/mypayments/page.jsx", "app/myaccount/myprofile/page.jsx", "app/myaccount/mywallet/page.jsx", "app/api/homeData.js"  ],
   "exclude": [
     "node_modules"
   ]

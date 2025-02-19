@@ -141,10 +141,45 @@ export default function ProductInfo({ product }) {
 
   const handleAddToBag = () => {
     try {
-      const items = [...productIds, product._id]
-      setProductIds(items)
-      localStorage.setItem("cart", JSON.stringify(items))
-      toast.success("Added to Bag")
+      // Check if sizes exist and no size is selected
+      if (product.sizes?.length > 0 && !selectedSize) {
+        toast.error("Please select a size before adding to bag")
+        return
+      }
+
+      const productWithFilters = {
+        productId: product._id,
+        selectedFilters,
+        selectedSize,
+        quantity: 1,
+      }
+
+      // Check if product already exists in cart
+      const existingProductIndex = productIds.findIndex(
+        (item) =>
+          item.productId === productWithFilters.productId &&
+          item.selectedSize === productWithFilters.selectedSize &&
+          JSON.stringify(item.selectedFilters) === JSON.stringify(productWithFilters.selectedFilters),
+      )
+
+      let updatedItems
+      if (existingProductIndex > -1) {
+        // If product exists, increment quantity
+        updatedItems = productIds.map((item, index) => {
+          if (index === existingProductIndex) {
+            return { ...item, quantity: item.quantity + 1 }
+          }
+          return item
+        })
+        toast.success("Product quantity updated in bag")
+      } else {
+        // If product doesn't exist, add new item
+        updatedItems = [...productIds, productWithFilters]
+        toast.success("Added to bag with selected options")
+      }
+
+      setProductIds(updatedItems)
+      localStorage.setItem("cart", JSON.stringify(updatedItems))
     } catch (error) {
       toast.error("Error adding product to bag")
     }
@@ -238,7 +273,10 @@ export default function ProductInfo({ product }) {
       {product.sizes && product.sizes.length > 0 && (
         <div>
           <div className="flex justify-between items-center mb-2">
-            <span className="font-medium">Select Size</span>
+            <div>
+              <span className="font-medium">Select Size</span>
+              {!selectedSize && <p className="text-sm text-red-500 mt-1">Please select a size to continue</p>}
+            </div>
             <Button variant="link" className="text-blue-600">
               SIZE GUIDE
             </Button>
@@ -250,7 +288,8 @@ export default function ProductInfo({ product }) {
                 variant="outline"
                 className={cn(
                   "h-12 w-12",
-                  selectedSize === size && "border-primary bg-primary/5"
+                  selectedSize === size && "border-primary bg-primary/5",
+                  !selectedSize && "border-red-200 hover:border-red-300",
                 )}
                 onClick={() => setSelectedSize(size)}
               >
@@ -258,21 +297,23 @@ export default function ProductInfo({ product }) {
               </Button>
             ))}
           </div>
-          {selectedSize && (
-            <p className="mt-2 text-sm text-muted-foreground">
-              Selected size: {selectedSize}
-            </p>
-          )}
+          {selectedSize && <p className="mt-2 text-sm text-muted-foreground">Selected size: {selectedSize}</p>}
         </div>
       )}
 
-
-      
-
       <div className="flex gap-4">
-        <Button className="flex-1 h-12" onClick={handleAddToBag}>
+        <Button
+          className={cn(
+            "flex-1 h-12",
+            product.sizes?.length > 0 && !selectedSize
+              ? "bg-slate-600 hover:bg-gray-100 cursor-not-allowed opacity-50"
+              : "",
+          )}
+          onClick={handleAddToBag}
+          disabled={product.sizes?.length > 0 && !selectedSize}
+        >
           <ShoppingBag className="w-5 h-5 mr-2" />
-          ADD TO BAG
+          {"ADD TO BAG"}
         </Button>
         <Button className="flex-1 h-12 bg-white text-black hover:bg-slate-100">
           <Heart className="w-5 h-5 mr-2" />
@@ -477,3 +518,4 @@ export default function ProductInfo({ product }) {
     </div>
   )
 }
+

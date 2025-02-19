@@ -501,7 +501,7 @@ export default function ProductManagement() {
           ? { 
               ...size, 
               tags: size.tags.includes(tag)
-                ? size.tags.size(t => t !== tag)
+                ? size.tags.filter(t => t !== tag)
                 : [...size.tags, tag]
             }
           : size

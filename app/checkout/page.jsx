@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import axios from "axios"
 import { useRouter } from "next/navigation"
-import Cookie  from "js-cookie"
+import Cookie from "js-cookie"
 
 export default function PaymentMethods() {
   const [cartProducts, setCartProducts] = useState([])
@@ -20,7 +20,7 @@ export default function PaymentMethods() {
   const handlePay = async () => {
     try {
       const user_data = await axios.post("https://backend.gezeno.in/api/get-user", { email })
-      console.log("user data",user_data.data)
+      console.log("user data", user_data.data)
       if (user_data.status === 200 && user_data.data.address) {
         const orderItems = cartProducts.map((product) => ({
           name: product.name,
@@ -28,7 +28,7 @@ export default function PaymentMethods() {
           image: product.image,
           price: product.price,
           product: product._id,
-
+          size: product.selectedSize,
         }))
 
         const itemsPrice = calculateTotal()
@@ -53,7 +53,7 @@ export default function PaymentMethods() {
 
         console.log("Order created:", order.data)
 
-          localStorage.setItem("cart", JSON.stringify([]))
+        localStorage.setItem("cart", JSON.stringify([]))
 
         router.push("/myaccount/myorders")
       } else {
@@ -69,27 +69,26 @@ export default function PaymentMethods() {
     setCartLoading(true)
     try {
       const cartData = localStorage.getItem("cart")
-      const cartItemIds = cartData ? JSON.parse(cartData) : []
+      const cartItems = cartData ? JSON.parse(cartData) : []
+      // console.log("cart",cartItems[0].productId)
 
-      const itemCounts = cartItemIds.reduce((acc, id) => {
-        acc[id] = (acc[id] || 0) + 1
-        return acc
-      }, {})
-
-      const uniqueIds = [...new Set(cartItemIds)]
-
-      const productPromises = uniqueIds.map((id) =>
+      const productPromises = cartItems.map((item) =>
         axios
-          .get(`https://backend.gezeno.in/api/products/${id}`)
-          .then((res) => ({ ...res.data, quantity: itemCounts[id] }))
+          .get(`https://backend.gezeno.in/api/products/${item.productId}`)
+          .then((res) => ({
+            ...res.data,
+            quantity: item.quantity,
+            selectedSize: item.selectedSize,
+          }))
           .catch((err) => {
-            console.error(`Error fetching product ${id}:`, err)
+            console.error(`Error fetching product ${item.productId}:`, err)
             return null
           }),
       )
 
       const products = await Promise.all(productPromises)
       const validProducts = products.filter((product) => product !== null)
+      console.log("Fetched products:", validProducts)
       setCartProducts(validProducts)
     } catch (error) {
       console.error("Error fetching cart products:", error)
@@ -100,10 +99,13 @@ export default function PaymentMethods() {
 
   useEffect(() => {
     fetchCartProducts()
-  }, []) //Fixed useEffect dependency
+  }, [])
 
   const calculateTotal = () => {
-    return cartProducts.reduce((total, product) => total + product.price * product.quantity, 0)
+    return cartProducts.reduce((total, product) => {
+      const price = product.price
+      return total + price * product.quantity
+    }, 0)
   }
 
   const totalMRP = calculateTotal()
@@ -202,9 +204,11 @@ export default function PaymentMethods() {
                   <div key={product._id} className="flex justify-between items-center py-2">
                     <div>
                       <p>{product.name}</p>
-                      <p className="text-sm text-muted-foreground">Quantity: {product.quantity}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Quantity: {product.quantity}, Size: {product.selectedSize || "N/A"}
+                      </p>
                     </div>
-                    <p>₹{(product.price * product.quantity).toFixed(2)}</p>
+                    <p>₹{((product.discountedPrice || product.price) * product.quantity).toFixed(2)}</p>
                   </div>
                 ))
               )}

@@ -16,16 +16,14 @@ export default function CartPage() {
   const [cartItems, setCartItems] = useState([])
   const [cartProducts, setCartProducts] = useState([])
   const [cartLoading, setCartLoading] = useState(true)
+  const [hasInitialFetch, setHasInitialFetch] = useState(false)
   const router = useRouter()
-  
-
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const homeresponse = await axios.get("https://backend.gezeno.in/api/home/headers")
         setNavBarData(homeresponse.data)
-        //  console.log(homeresponse.data)
       } catch (error) {
         console.log("error", error)
       } finally {
@@ -38,78 +36,59 @@ export default function CartPage() {
   const removeFromCart = (productId) => {
     setCartLoading(true)
     const cartData = localStorage.getItem("cart")
-    const cartItemIds = cartData ? JSON.parse(cartData) : []
-    const updatedCartItemIds = cartItemIds.filter((id) => id !== productId)
-    localStorage.setItem("cart", JSON.stringify(updatedCartItemIds))
+    const cartItems = cartData ? JSON.parse(cartData) : []
+    const updatedCartItems = cartItems.filter((item) => item.productId !== productId)
+    localStorage.setItem("cart", JSON.stringify(updatedCartItems))
     setCartProducts((prevProducts) => prevProducts.filter((product) => product._id !== productId))
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== productId))
+    setCartItems((prevItems) => prevItems.filter((item) => item.productId !== productId))
     setCartLoading(false)
   }
 
   const updateQuantity = (productId, newQuantity) => {
     if (newQuantity < 1) return
     const cartData = localStorage.getItem("cart")
-    const cartItemIds = cartData ? JSON.parse(cartData) : []
-    const currentQuantity = cartItemIds.filter((id) => id === productId).length
-
-    if (newQuantity > currentQuantity) {
-      // Add more instances of the product ID
-      const toAdd = newQuantity - currentQuantity
-      const updatedCartItemIds = [...cartItemIds, ...Array(toAdd).fill(productId)]
-      localStorage.setItem("cart", JSON.stringify(updatedCartItemIds))
-    } else if (newQuantity < currentQuantity) {
-      // Remove some instances of the product ID
-      let toRemove = currentQuantity - newQuantity
-      const updatedCartItemIds = cartItemIds.filter((id, index) => {
-        if (id === productId) {
-          if (toRemove > 0) {
-            toRemove--
-            return false
-          }
-        }
-        return true
-      })
-      localStorage.setItem("cart", JSON.stringify(updatedCartItemIds))
-    }
+    const cartItems = cartData ? JSON.parse(cartData) : []
+    const updatedCartItems = cartItems.map((item) =>
+      item.productId === productId ? { ...item, quantity: newQuantity } : item,
+    )
+    localStorage.setItem("cart", JSON.stringify(updatedCartItems))
 
     setCartProducts((prevProducts) =>
       prevProducts.map((product) => (product._id === productId ? { ...product, quantity: newQuantity } : product)),
     )
     setCartItems((prevItems) =>
-      prevItems.map((item) => (item.id === productId ? { ...item, quantity: newQuantity } : item)),
+      prevItems.map((item) => (item.productId === productId ? { ...item, quantity: newQuantity } : item)),
     )
   }
 
   const increaseQuantity = (productId) => {
-    const item = cartItems.find((item) => item.id === productId)
+    const item = cartItems.find((item) => item.productId === productId)
     if (item) updateQuantity(productId, item.quantity + 1)
   }
 
   const decreaseQuantity = (productId) => {
-    const item = cartItems.find((item) => item.id === productId)
+    const item = cartItems.find((item) => item.productId === productId)
     if (item && item.quantity > 1) updateQuantity(productId, item.quantity - 1)
   }
 
   const fetchCartProducts = async () => {
     setCartLoading(true)
+    setHasInitialFetch(false)
     try {
       const cartData = localStorage.getItem("cart")
-      const cartItemIds = cartData ? JSON.parse(cartData) : []
+      const cartItems = cartData ? JSON.parse(cartData) : []
 
-      // Count occurrences of each product ID
-      const itemCounts = cartItemIds.reduce((acc, id) => {
-        acc[id] = (acc[id] || 0) + 1
-        return acc
-      }, {})
-
-      const uniqueIds = [...new Set(cartItemIds)]
-
-      const productPromises = uniqueIds.map((id) =>
+      const productPromises = cartItems.map((item) =>
         axios
-          .get(`https://backend.gezeno.in/api/products/${id}`)
-          .then((res) => ({ ...res.data, quantity: itemCounts[id] }))
+          .get(`https://backend.gezeno.in/api/products/${item.productId}`)
+          .then((res) => ({
+            ...res.data,
+            quantity: item.quantity || 1, // Set default quantity to 1
+            selectedFilters: item.selectedFilters,
+            selectedSize: item.selectedSize,
+          }))
           .catch((err) => {
-            console.error(`Error fetching product ${id}:`, err)
+            console.error(`Error fetching product ${item.productId}:`, err)
             return null
           }),
       )
@@ -117,34 +96,40 @@ export default function CartPage() {
       const products = await Promise.all(productPromises)
       const validProducts = products.filter((product) => product !== null)
       setCartProducts(validProducts)
-      setCartItems(validProducts.map((product) => ({ id: product._id, quantity: product.quantity })))
+      console.log("cart prod", validProducts)
+      setCartItems(cartItems)
     } catch (error) {
       console.error("Error fetching cart products:", error)
     } finally {
       setCartLoading(false)
+      setHasInitialFetch(true)
     }
   }
 
   useEffect(() => {
-    fetchCartProducts()
-  }, [])
+    if (!hasInitialFetch) {
+      fetchCartProducts()
+      setHasInitialFetch(true)
+    }
+  }, [hasInitialFetch, cartItems]) // Added cartItems to dependencies
+
   const onProceed = () => {
-    const user_email = Cookie.get('cred')
+    const user_email = Cookie.get("cred")
 
     if (!user_email) {
-      router.push('/login')  // Redirect to login if no email is found
+      router.push("/login")
       return
     }
 
-    router.push('/checkout') // Redirect to checkout if logged in
+    router.push("/checkout")
   }
 
-
   useEffect(() => {
-    if (cartItems.length > 0 && cartProducts.length === 0) {
+    if (!hasInitialFetch && cartItems.length > 0 && cartProducts.length === 0) {
       fetchCartProducts()
+      setHasInitialFetch(true)
     }
-  }, [cartItems])
+  }, [hasInitialFetch, cartItems, cartProducts.length])
 
   if (isLoading) {
     return <Loading />
@@ -197,7 +182,7 @@ export default function CartPage() {
                 <div key={product._id} className="border rounded-lg mb-4">
                   <div className="p-4 md:p-6">
                     <div className="flex gap-4 md:gap-6 relative">
-                      <button className="absolute right-0 top-0 md:hidden"  onClick={() => removeFromCart(product._id)}> 
+                      <button className="absolute right-0 top-0 md:hidden" onClick={() => removeFromCart(product._id)}>
                         <X className="h-5 w-5" />
                       </button>
                       <img
@@ -211,24 +196,25 @@ export default function CartPage() {
                           <div className="space-y-2">
                             <div className="flex items-center gap-2">
                               <span className="text-lg md:text-xl font-bold">₹{product.price * product.quantity}</span>
-                              {product.price && (
+                              {product.discountedPrice && (
                                 <span className="text-sm line-through text-gray-500">
                                   ₹{product.discountedPrice * product.quantity}
                                 </span>
                               )}
                             </div>
                             <div className="text-sm text-gray-600 space-y-1">
-                              {/* {product.price && (
-                                <div className="flex justify-between text-green-600">
-                                  <span>Discount:</span>
-                                  <span>-₹{(product.discountedPrice) * product.quantity}</span>
-                                </div>
-                              )} */}
-                            
+                              {/* Selected filters */}
+                              {product.selectedFilters &&
+                                Object.entries(product.selectedFilters).map(([filterName, filterValue]) => (
+                                  <p key={filterName}>
+                                    {filterName}: {Array.isArray(filterValue) ? filterValue.join(", ") : filterValue}
+                                  </p>
+                                ))}
+                              {/* Selected size */}
+                              {product.selectedSize && <p>Size: {product.selectedSize}</p>}
                             </div>
                           </div>
                           <div className="text-sm mt-2 md:mt-0">
-                            <p>Size: {product.size || "Standard"}</p>
                             <div className="flex items-center mt-2">
                               <Button onClick={() => decreaseQuantity(product._id)} variant="outline" size="sm">
                                 -
@@ -293,12 +279,12 @@ export default function CartPage() {
                   <div key={`summary-${product.id}`} className="text-sm border-b pb-2 last:border-0">
                     <div className="flex justify-between">
                       <span className="text-gray-600">{product.name}</span>
-                      <span>₹{product.price * product.quantity}</span>
+                      <span>₹{Math.round(product.price * product.quantity)}</span>
                     </div>
                     {product.mrp && product.mrp > product.price && (
                       <div className="flex justify-between text-green-600 text-xs">
                         <span>Saved</span>
-                        <span>₹{(product.mrp - product.price) * product.quantity}</span>
+                        <span>₹{Math.round((product.discountedPrice) * product.quantity)}</span>
                       </div>
                     )}
                   </div>
