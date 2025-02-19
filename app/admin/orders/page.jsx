@@ -167,14 +167,14 @@ export default function OrdersPage() {
       console.log("Formatted Order Data:", formattedOrderData);
   
       // Call your backend API instead of Shiprocket directly
-      const response = await fetch("http://localhost:8080/api/shiprocket/create-order", {
+      const response = await fetch("https://backend.gezeno.in/api/shiprocket/create-order", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(formattedOrderData),
       });
-  
+    
       const data = await response.json();
       console.log("Shipping Response:", data);
   
