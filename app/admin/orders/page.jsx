@@ -106,11 +106,14 @@ export default function OrdersPage() {
   }
 
   const handleShipOrder = async (order) => {
-    console.log("token", adminToken)
+    console.log("Admin Token:", adminToken);
+    
     try {
-      console.log("ship order", order)
+      console.log("Original Order:", order);
+  
       // Format order data for Shiprocket API
       const formattedOrderData = {
+        token: adminToken, // Include token in body instead of headers
         order_id: order._id,
         order_date: new Date(order.createdAt).toISOString(),
         pickup_location: "Primary",
@@ -137,9 +140,9 @@ export default function OrdersPage() {
         shipping_state: order.shippingInfo.state || "",
         shipping_email: order.user.email,
         shipping_phone: order.shippingInfo.phone || "",
-        order_items: order.orderItems.map((item,index) => ({
+        order_items: order.orderItems.map((item, index) => ({
           name: item.name,
-          sku: `${item.product._id}${(index+1).toString()}`,
+          sku: `${item.product._id}${(index + 1).toString()}`,
           units: item.quantity,
           selling_price: item.price.toString(),
           discount: ((item.price - (item.product.discountedPrice || item.price)) * item.quantity).toString(),
@@ -152,51 +155,53 @@ export default function OrdersPage() {
         transaction_charges: 0,
         total_discount: order.orderItems.reduce(
           (sum, item) => sum + (item.price - (item.product.discountedPrice || item.price)) * item.quantity,
-          0,
+          0
         ),
         sub_total: order.itemsPrice,
         length: 10,
         breadth: 15,
         height: 20,
         weight: 2.5,
-      }
-      console.log("ship order formatted", formattedOrderData)
-
-      // Make API call to Shiprocket
-      const response = await axios.post(
-        "https://apiv2.shiprocket.in/v1/external/orders/create/adhoc",
-        formattedOrderData,
-        {
-          headers: {
-            Authorization: `Bearer ${adminToken}`,
-            "Content-Type": "application/json",
-          },
+      };
+  
+      console.log("Formatted Order Data:", formattedOrderData);
+  
+      // Call your backend API instead of Shiprocket directly
+      const response = await fetch("http://localhost:8080/api/shiprocket/create-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      )
-      console.log("shippin status",response.data)
-
-      if (response.data.status === 1) {
+        body: JSON.stringify(formattedOrderData),
+      });
+  
+      const data = await response.json();
+      console.log("Shipping Response:", data);
+  
+      if (data.status === 1) {
         setShippingStatuses((prev) => ({
           ...prev,
           [order._id]: "Shipped",
-        }))
+        }));
+      } else {
+        setShippingStatuses((prev) => ({
+          ...prev,
+          [order._id]: "Not Shipped",
+        }));
       }
-
     } catch (error) {
-      console.error("Error creating shipment:", error)
+      console.error("Error creating shipment:", error);
       setShippingStatuses((prev) => ({
         ...prev,
         [order._id]: "Not Shipped",
-      }))
-    }
-    finally{
+      }));
+    } finally {
       setShippingStatuses((prev) => ({
         ...prev,
         [order._id]: "Shipped",
-      }))
-
+      }));
     }
-  }
+  };
 
   const calculateOrderStats = () => {
     const totalOrders = orders.length
