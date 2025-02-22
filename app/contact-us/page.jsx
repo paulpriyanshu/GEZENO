@@ -5,7 +5,7 @@ import { revalidate } from "../page"
 // Function to fetch terms and conditions
 async function getTermsAndConditions() {
   try {
-    const res = await fetch("http://backend.gezeno.in/api/terms-and-conditions",{
+    const res = await fetch("https://backend.gezeno.in/api/terms-and-conditions",{
         next:{revalidate:5}
     })
     if (!res.ok) {

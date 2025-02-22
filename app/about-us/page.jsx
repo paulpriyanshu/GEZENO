@@ -5,7 +5,7 @@ import NavBar from "@/components/NavBar"
 // ✅ Fetch Terms & Conditions on the Server Side
 async function getTermsAndConditions() {
   try {
-    const res = await fetch("http://backend.gezeno.in/api/terms-and-conditions", {
+    const res = await fetch("https://backend.gezeno.in/api/terms-and-conditions", {
         next:{revalidate:5}
     })
     if (!res.ok) {
