@@ -1,13 +1,11 @@
-"use client"
 import { notFound } from "next/navigation"
-import { useEffect, useState } from "react"
 import NavBar from "@/components/NavBar"
 
-// Function to fetch terms and conditions with caching
+// Function to fetch terms and conditions
 async function getTermsAndConditions() {
   try {
-    const res = await fetch("https://backend.gezeno.in/api/terms-and-conditions",{
-      next:{revalidate:5}
+    const res = await fetch("https://backend.gezeno.in/api/terms-and-conditions", {
+      next: { revalidate: 5 }, // Cache revalidation
     })
 
     if (!res.ok) {
@@ -18,17 +16,19 @@ async function getTermsAndConditions() {
     }
 
     const data = await res.json()
-    return data.terms // Assuming `terms` contains the HTML content
+    return data.terms // Assuming `terms` contains HTML content
   } catch (error) {
     console.error("Error fetching terms:", error)
     return null
   }
 }
 
-// Function to fetch navbar data with caching
+// Function to fetch navbar data
 async function getNavBarData() {
   try {
-    const res = await fetch("https://backend.gezeno.in/api/home/headers")
+    const res = await fetch("https://backend.gezeno.in/api/home/headers", {
+      next: { revalidate: 10 }, // Optional caching
+    })
 
     if (!res.ok) {
       throw new Error("Failed to fetch navbar data")
@@ -41,41 +41,15 @@ async function getNavBarData() {
   }
 }
 
-// Skeleton loader component
-const SkeletonLoader = () => (
-  <div className="animate-pulse space-y-4">
-    {Array(10).fill(null).map((_, index) => (
-      <div key={index} className="h-4 bg-gray-300 rounded w-full"></div>
-    ))}
-  </div>
-)
+// Server Component
+export default async function TermsOfService() {
+  const [terms, navBarData] = await Promise.all([
+    getTermsAndConditions(),
+    getNavBarData(),
+  ])
 
-export default function TermsOfService() {
-  const [terms, setTerms] = useState<string | null>(null)
-  const [navBarData, setNavBarData] = useState([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const [termsData, navData] = await Promise.all([
-        getTermsAndConditions(),
-        getNavBarData(),
-      ])
-
-      setTerms(termsData)
-      setNavBarData(navData)
-      setLoading(false)
-    }
-
-    fetchData()
-  }, [])
-
-  if (loading || !terms) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 py-12">
-        <SkeletonLoader />
-      </div>
-    )
+  if (!terms) {
+    return notFound()
   }
 
   return (
