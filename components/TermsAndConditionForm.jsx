@@ -13,6 +13,8 @@ const TermsAndConditionForm = () => {
   const [privacyPolicy, setPrivacyPolicy] = useState("");
   const [returns, setReturns] = useState("");
   const [cancellation, setCancellation] = useState("");
+  const [aboutus,setAboutUs]=useState("")
+  const [contactus,setContactUs]=useState("")
   const [isClient, setIsClient] = useState(false); // For handling SSR
   const [loading, setLoading] = useState(true); // Loading state
 
@@ -26,7 +28,7 @@ const TermsAndConditionForm = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          "https://backend.gezeno.in/api/terms-and-conditions"
+          "http://backend.gezeno.in/api/terms-and-conditions"
         );
         const data = response.data;
 
@@ -37,6 +39,8 @@ const TermsAndConditionForm = () => {
         setPrivacyPolicy(data.privacyPolicy || "");
         setReturns(data.returns || "");
         setCancellation(data.cancellation || "");
+        setAboutUs(data.aboutus || "")
+        setContactUs(data.contactus ||"")
 
         toast.success("Data loaded successfully!");
       } catch (error) {
@@ -54,12 +58,14 @@ const TermsAndConditionForm = () => {
   const handleSave = async () => {
     try {
       const data = await axios.post(
-        "https://backend.gezeno.in/api/terms-and-conditions",
+        "http://backend.gezeno.in/api/terms-and-conditions",
         {
           terms,
           privacyPolicy,
           returns,
           cancellation,
+          aboutus,
+          contactus
         }
       );
       console.log("Data Saved:", data);
@@ -99,6 +105,12 @@ const TermsAndConditionForm = () => {
 
       <h2>Cancellation</h2>
       {isClient && <ReactQuill value={cancellation} onChange={setCancellation} theme="snow" />}
+      
+      <h2>About Us</h2>
+      {isClient && <ReactQuill value={aboutus} onChange={setAboutUs} theme="snow" />}
+
+      <h2>Contact Us</h2>
+      {isClient && <ReactQuill value={contactus} onChange={setContactUs} theme="snow" />}
 
       <button
         onClick={handleSave}

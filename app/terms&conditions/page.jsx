@@ -1,76 +1,73 @@
 "use client"
 import { notFound } from "next/navigation"
 import { useEffect, useState } from "react"
-import axios from "axios"
 import NavBar from "@/components/NavBar"
 
-// Function to fetch terms and conditions
+// Function to fetch terms and conditions with caching
 async function getTermsAndConditions() {
   try {
-    const res = await axios.get("https://backend.gezeno.in/api/terms-and-conditions", {
-      headers: { "Content-Type": "application/json" },
+    const res = await fetch("https://backend.gezeno.in/api/terms-and-conditions",{
+      next:{revalidate:5}
     })
-    if (res.status === 404) {
-      notFound()
+
+    if (!res.ok) {
+      if (res.status === 404) {
+        notFound()
+      }
+      throw new Error("Failed to fetch terms")
     }
-    console.log("res",res.data)
-    return res.data.terms // Assuming the HTML content is in `data`
+
+    const data = await res.json()
+    return data.terms // Assuming `terms` contains the HTML content
   } catch (error) {
-    throw new Error('Failed to fetch terms')
+    console.error("Error fetching terms:", error)
+    return null
+  }
+}
+
+// Function to fetch navbar data with caching
+async function getNavBarData() {
+  try {
+    const res = await fetch("https://backend.gezeno.in/api/home/headers")
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch navbar data")
+    }
+
+    return await res.json()
+  } catch (error) {
+    console.error("Error fetching navbar data:", error)
+    return []
   }
 }
 
 // Skeleton loader component
 const SkeletonLoader = () => (
   <div className="animate-pulse space-y-4">
-    <div className="h-6 bg-gray-300 rounded w-3/4"></div>
-    <div className="h-4 bg-gray-300 rounded w-full"></div>
-    <div className="h-4 bg-gray-300 rounded w-5/6"></div>
-    <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-    <div className="h-4 bg-gray-300 rounded w-full"></div>
-    <div className="h-4 bg-gray-300 rounded w-5/6"></div>
-    <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-    <div className="h-4 bg-gray-300 rounded w-full"></div>
-    <div className="h-4 bg-gray-300 rounded w-5/6"></div>
-    <div className="h-4 bg-gray-300 rounded w-3/4"></div> 
-    <div className="h-4 bg-gray-300 rounded w-full"></div>
-    <div className="h-4 bg-gray-300 rounded w-5/6"></div>
-    <div className="h-4 bg-gray-300 rounded w-3/4"></div> 
-    <div className="h-4 bg-gray-300 rounded w-full"></div>
-    <div className="h-4 bg-gray-300 rounded w-5/6"></div>
-    <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+    {Array(10).fill(null).map((_, index) => (
+      <div key={index} className="h-4 bg-gray-300 rounded w-full"></div>
+    ))}
   </div>
 )
 
 export default function TermsOfService() {
-  const [terms, setTerms] = useState(null)
+  const [terms, setTerms] = useState<string | null>(null)
   const [navBarData, setNavBarData] = useState([])
-  const [loading, setLoading] = useState(true)  // State to track loading of the navbar data
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const data = await getTermsAndConditions()
-        setTerms(data)
-      } catch (error) {
-        console.error("Error fetching terms:", error)
-      }
-    }
-    fetchData()
-  }, [])
+      const [termsData, navData] = await Promise.all([
+        getTermsAndConditions(),
+        getNavBarData(),
+      ])
 
-  useEffect(() => {
-    const fetchHeader = async () => {
-      try {
-        const homeConfigResponse = await axios.get('https://backend.gezeno.in/api/home/headers')
-        setNavBarData(homeConfigResponse.data)
-      } catch (error) {
-        console.error('Error fetching data:', error)
-      } finally {
-        setLoading(false)  // Set loading to false when data is fetched
-      }
+      setTerms(termsData)
+      setNavBarData(navData)
+      setLoading(false)
     }
-    fetchHeader()
+
+    fetchData()
   }, [])
 
   if (loading || !terms) {
@@ -83,16 +80,11 @@ export default function TermsOfService() {
 
   return (
     <>
-    <NavBar data={navBarData}/>
-        <div className="max-w-4xl mx-auto px-4 py-12">
-       
-       <h1 className="flex justify-center w-full text-3xl">Terms Of Service</h1>
-     <div
-       className="prose" // Apply the prose class for rich text formatting
-       dangerouslySetInnerHTML={{ __html: terms }}
-     />
-   </div>
+      <NavBar data={navBarData} />
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        <h1 className="flex justify-center w-full text-3xl">Terms Of Service</h1>
+        <div className="prose" dangerouslySetInnerHTML={{ __html: terms }} />
+      </div>
     </>
-
   )
 }
