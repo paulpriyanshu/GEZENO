@@ -72,7 +72,11 @@ export default function AddressForm() {
       console.error("Error submitting address:", error)
     }
   }
-
+  useEffect(() => {
+    if (address) {
+      form.reset(address); // Ensure form values update when address changes
+    }
+  }, [address, form]);
   return (
     <div className="flex justify-center items-center">
       {/* If address exists, show it in a card */}
