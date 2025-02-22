@@ -1,98 +1,63 @@
-"use client"
 import { notFound } from "next/navigation"
-import { useEffect, useState } from "react"
-import axios from "axios"
 import NavBar from "@/components/NavBar"
 
 // Function to fetch terms and conditions
 async function getTermsAndConditions() {
   try {
-    const res = await axios.get("https://backend.gezeno.in/api/terms-and-conditions", {
+    const res = await fetch("https://backend.gezeno.in/api/terms-and-conditions", {
       headers: { "Content-Type": "application/json" },
+      next: { revalidate: 5 }, // Enables caching & revalidation every 5 sec
     })
-    if (res.status === 404) {
-      notFound()
+
+    if (!res.ok) {
+      if (res.status === 404) {
+        notFound()
+      }
+      throw new Error("Failed to fetch terms")
     }
-    console.log("res",res.data.cancellation)
-    return res.data.cancellation // Assuming the HTML content is in `data`
+
+    const data = await res.json()
+    return data.cancellation // Assuming `cancellation` contains HTML content
   } catch (error) {
-    throw new Error('Failed to fetch terms')
+    console.error("Error fetching terms:", error)
+    return null
   }
 }
 
-// Skeleton loader component
-const SkeletonLoader = () => (
-  <div className="animate-pulse space-y-4">
-    <div className="h-6 bg-gray-300 rounded w-3/4"></div>
-    <div className="h-4 bg-gray-300 rounded w-full"></div>
-    <div className="h-4 bg-gray-300 rounded w-5/6"></div>
-    <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-    <div className="h-4 bg-gray-300 rounded w-full"></div>
-    <div className="h-4 bg-gray-300 rounded w-5/6"></div>
-    <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-    <div className="h-4 bg-gray-300 rounded w-full"></div>
-    <div className="h-4 bg-gray-300 rounded w-5/6"></div>
-    <div className="h-4 bg-gray-300 rounded w-3/4"></div> 
-    <div className="h-4 bg-gray-300 rounded w-full"></div>
-    <div className="h-4 bg-gray-300 rounded w-5/6"></div>
-    <div className="h-4 bg-gray-300 rounded w-3/4"></div> 
-    <div className="h-4 bg-gray-300 rounded w-full"></div>
-    <div className="h-4 bg-gray-300 rounded w-5/6"></div>
-    <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-  </div>
-)
+// Function to fetch navbar data
+async function getNavBarData() {
+  try {
+    const res = await fetch("https://backend.gezeno.in/api/home/headers")
 
-export default function TermsOfService() {
-  const [terms, setTerms] = useState(null)
-  const [navBarData, setNavBarData] = useState([])
-  const [loading, setLoading] = useState(true)  // State to track loading of the navbar data
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await getTermsAndConditions()
-        setTerms(data)
-      } catch (error) {
-        console.error("Error fetching terms:", error)
-      }
+    if (!res.ok) {
+      throw new Error("Failed to fetch navbar data")
     }
-    fetchData()
-  }, [])
 
-  useEffect(() => {
-    const fetchHeader = async () => {
-      try {
-        const homeConfigResponse = await axios.get('https://backend.gezeno.in/api/home/headers')
-        setNavBarData(homeConfigResponse.data)
-      } catch (error) {
-        console.error('Error fetching data:', error)
-      } finally {
-        setLoading(false)  // Set loading to false when data is fetched
-      }
-    }
-    fetchHeader()
-  }, [])
+    return await res.json()
+  } catch (error) {
+    console.error("Error fetching navbar data:", error)
+    return []
+  }
+}
 
-  if (loading || !terms) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 py-12">
-        <SkeletonLoader />
-      </div>
-    )
+// Server Component
+export default async function TermsOfService() {
+  const [terms, navBarData] = await Promise.all([
+    getTermsAndConditions(),
+    getNavBarData(),
+  ])
+
+  if (!terms) {
+    return notFound()
   }
 
   return (
     <>
-    <NavBar data={navBarData}/>
-        <div className="max-w-4xl mx-auto px-4 py-12">
-       
-       <h1 className="flex justify-center w-full text-3xl">Cancel Orders</h1>
-     <div
-       className="prose" // Apply the prose class for rich text formatting
-       dangerouslySetInnerHTML={{ __html: terms }}
-     />
-   </div>
+      <NavBar data={navBarData} />
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        <h1 className="flex justify-center w-full text-3xl">Cancel Orders</h1>
+        <div className="prose" dangerouslySetInnerHTML={{ __html: terms }} />
+      </div>
     </>
-
   )
 }

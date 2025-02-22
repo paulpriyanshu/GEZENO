@@ -26,9 +26,7 @@ async function getTermsAndConditions() {
 // Function to fetch navbar data
 async function getNavBarData() {
   try {
-    const res = await fetch("https://backend.gezeno.in/api/home/headers", {
-      next: { revalidate: 10 }, // Optional caching
-    })
+    const res = await fetch("https://backend.gezeno.in/api/home/headers")
 
     if (!res.ok) {
       throw new Error("Failed to fetch navbar data")
