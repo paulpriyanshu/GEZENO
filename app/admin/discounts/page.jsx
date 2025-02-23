@@ -1,92 +1,147 @@
 "use client"
 
-import React, { useState } from "react"
+import { useState, useEffect } from "react"
+import { format } from "date-fns"
+import { Plus, Pencil, Trash2, Check, X } from "lucide-react"
+import { toast, Toaster } from "react-hot-toast"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/Input"
-import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Pencil, Save } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import CouponForm  from "./coupon-form"
+import { DeleteDialog } from "./delete-dailog"
 
 
 
-export default function DiscountsPage() {
-  const [products, setProducts] = useState([
-    { id: 1, name: "Wireless Earbuds", category: "Electronics", price: 2999, discount: 10 },
-    { id: 2, name: "Cotton Kurta", category: "Clothing", price: 1499, discount: 15 },
-    { id: 3, name: "Smart Speaker", category: "Electronics", price: 3999, discount: 5 },
-    { id: 4, name: "Yoga Mat", category: "Sports & Outdoors", price: 799, discount: 0 },
-    { id: 5, name: "Stainless Steel Tiffin Box", category: "Home & Kitchen", price: 599, discount: 20 },
-  ])
+export default function Page() {
+  const [coupons, setCoupons] = useState([])
+  const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [editingCoupon, setEditingCoupon] = useState(null)
+  const [deleteId, setDeleteId] = useState(null)
 
-  const [editingId, setEditingId] = useState(null)
-  const [editValue, setEditValue] = useState("")
+  useEffect(() => {
+    fetchCoupons()
+  }, [])
 
-  const handleEdit = (id, currentDiscount) => {
-    setEditingId(id)
-    setEditValue(currentDiscount.toString())
+  const fetchCoupons = async () => {
+    try {
+      const response = await fetch("http://localhost:8080/api/getAllCoupons")
+      const data = await response.json()
+      if (data.success) {
+        setCoupons(data.data)
+      }
+    } catch (error) {
+      toast.error("Failed to fetch coupons")
+    }
   }
 
-  const handleSave = (id) => {
-    const updatedProducts = products.map(product => 
-      product.id === id ? { ...product, discount: parseFloat(editValue) || 0 } : product
-    )
-    setProducts(updatedProducts)
-    setEditingId(null)
-  }
-
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(price)
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/deleteCoupon/${id}`, {
+        method: "POST",
+      })
+      const data = await response.json()
+      if (data.success) {
+        toast.success("Coupon deleted successfully")
+        fetchCoupons()
+      }
+    } catch (error) {
+      toast.error("Failed to delete coupon")
+    }
+    setDeleteId(null)
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Product Discounts</h1>
+        <Toaster position="top-right" />
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Coupon Management</h1>
+        <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Create Coupon
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Create New Coupon</DialogTitle>
+            </DialogHeader>
+            <CouponForm
+              onSuccess={() => {
+                setIsCreateOpen(false)
+                fetchCoupons()
+              }}
+            />
+          </DialogContent>
+        </Dialog>
+      </div>
+
       <Card>
         <CardHeader>
-          <CardTitle>Manage Discounts</CardTitle>
+          <CardTitle>All Coupons</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Product Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Discount (%)</TableHead>
+                <TableHead>Code</TableHead>
+                <TableHead>Discount</TableHead>
+                <TableHead>Valid Period</TableHead>
+                <TableHead>Usage</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {products.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell>{product.name}</TableCell>
-                  <TableCell>{product.category}</TableCell>
-                  <TableCell>{formatPrice(product.price)}</TableCell>
+              {coupons.map((coupon) => (
+                <TableRow key={coupon._id}>
+                  <TableCell className="font-medium">{coupon.code}</TableCell>
                   <TableCell>
-                    {editingId === product.id ? (
-                      <Input
-                        type="number"
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        className="w-20"
-                      />
-                    ) : (
-                      `${product.discount}%`
-                    )}
+                    {coupon.discountType === "percentage" ? `${coupon.discountValue}%` : `₹${coupon.discountValue}`}
                   </TableCell>
                   <TableCell>
-                    {editingId === product.id ? (
-                      <Button size="sm" onClick={() => handleSave(product.id)}>
-                        <Save className="h-4 w-4 mr-1" />
-                        Save
+                    <div className="text-sm">
+                      {format(new Date(coupon.startDate), "PP")} -
+                      <br />
+                      {format(new Date(coupon.endDate), "PP")}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {coupon.currentUses} / {coupon.maxUses || "∞"}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={coupon.isActive ? "default" : "secondary"}>
+                      {coupon.isActive ? <Check className="w-4 h-4 mr-1" /> : <X className="w-4 h-4 mr-1" />}
+                      {coupon.isActive ? "Active" : "Inactive"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl">
+                          <DialogHeader>
+                            <DialogTitle>Edit Coupon</DialogTitle>
+                          </DialogHeader>
+                          <CouponForm
+                            coupon={coupon}
+                            onSuccess={() => {
+                              setEditingCoupon(null)
+                              fetchCoupons()
+                            }}
+                          />
+                        </DialogContent>
+                      </Dialog>
+                      <Button variant="destructive" size="sm" onClick={() => setDeleteId(coupon._id)}>
+                        <Trash2 className="w-4 h-4" />
                       </Button>
-                    ) : (
-                      <Button size="sm" variant="outline" onClick={() => handleEdit(product.id, product.discount)}>
-                        <Pencil className="h-4 w-4 mr-1" />
-                        Edit
-                      </Button>
-                    )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -94,29 +149,13 @@ export default function DiscountsPage() {
           </Table>
         </CardContent>
       </Card>
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle>Discount Summary</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div>
-              <Label>Total Products</Label>
-              <p className="text-2xl font-bold">{products.length}</p>
-            </div>
-            <div>
-              <Label>Products with Discount</Label>
-              <p className="text-2xl font-bold">{products.filter(p => p.discount > 0).length}</p>
-            </div>
-            <div>
-              <Label>Average Discount</Label>
-              <p className="text-2xl font-bold">
-                {(products.reduce((sum, p) => sum + p.discount, 0) / products.length).toFixed(2)}%
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+
+      <DeleteDialog
+        isOpen={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={() => deleteId && handleDelete(deleteId)}
+      />
     </div>
   )
 }
+

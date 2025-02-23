@@ -3,7 +3,7 @@
 import AdminHeader from "../../components/AdminHeader";
 import AdminSideBar from "../../components/AdminSideBar";
 import React, { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation"; // Use Next.js router
+import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { toggleSidebar } from "../lib/store/features/adminsidebar/SideBarSlice";
 import { useAppSelector } from "../lib/hooks";
@@ -18,14 +18,13 @@ export default function Layout({ children }) {
   // ✅ Check for Admin Session Before Rendering
   useEffect(() => {
     const token = localStorage.getItem("adminToken");
+
     if (!token) {
-      router.push("/adminLogin"); // Redirect to login if no token
-      setLoading(false)
-    } else {
-      router.push("/admin/home");
-      setLoading(false); // Allow page to load if token exists
-    }
-  }, [router]);
+      router.replace("/adminLogin"); // Redirect to login only if no token
+    } 
+
+    setLoading(false); // Stop loading once token check is done
+  }, []);
 
   const handleClickOutside = (event) => {
     if (isOpen && sidebarRef.current && !sidebarRef.current.contains(event.target)) {

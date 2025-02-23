@@ -4,82 +4,113 @@ import { useState, useEffect } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import { format } from "date-fns"
-import debounce from "lodash/debounce"
+import { toast, Toaster } from "react-hot-toast"
 
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/Input"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Checkbox } from "@/components/ui/checkbox"
+import axios from "axios"
+import Cookie from "js-cookie"
 
 const formSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string(),
   email: z.string().email("Invalid email address"),
   mobile: z.string().min(10, "Invalid mobile number"),
-  dob: z.date(),
   gender: z.enum(["male", "female", "other"]),
-  whatsappUpdates: z.boolean().default(false),
 })
 
-// Simulated server action - replace with your actual database call
 async function updateUserProfile(values) {
-  try {
-    const response = await fetch("/api/user/profile", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(values),
+  const response = await axios.post("http://localhost:8080/api/update-profile", {
+      username: `${values.firstName} ${values.lastName}`.trim(),
+      email: values.email,
+      phone: values.mobile,
+      gender: values.gender,
     })
-    if (!response.ok) throw new Error("Failed to update profile")
-    return await response.json()
-  } catch (error) {
-    console.error("Error updating profile:", error)
-    throw error
+
+  if (!response) {
+    throw new Error("Failed to update profile")
   }
+
+  return response
+}
+
+async function fetchUserData(email) {
+  // Replace this with your actual API call to fetch user data
+  const response = await axios.post("http://localhost:8080/api/get-user", {
+    email
+  })
+  console.log("response", response.data)
+
+  return response.data
 }
 
 export default function UserProfile() {
   const [isSaving, setIsSaving] = useState(false)
+  const [userData, setUserData] = useState(null)
 
-  // Initialize form with mock user data
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      firstName: "Priyanshu",
+      firstName: "",
       lastName: "",
-      email: "priyanshu.paul003@gmail.com",
-      mobile: "+918448157940",
-      dob: new Date("2024-08-13"),
+      email: "",
+      mobile: "",
       gender: "male",
-      whatsappUpdates: false,
     },
   })
 
-  // Debounced save function
-  const debouncedSave = debounce(async (values) => {
-    setIsSaving(true)
-    try {
-      await updateUserProfile(values)
-    } finally {
-      setIsSaving(false)
-    }
-  }, 1000)
-
-  // Watch form changes and auto-save
   useEffect(() => {
-    const subscription = form.watch((value) => {
-      debouncedSave(value)
-    })
-    return () => subscription.unsubscribe()
-  }, [form.watch, debouncedSave]) // Added debouncedSave to dependencies
+    async function loadUserData() {
+      const email = Cookie.get('cred')
+      const data = await fetchUserData(email)
+      setUserData(data)
+
+      // Set form values after data is fetched
+      form.reset({
+        firstName: data.fullName.split(' ')[0] || "",
+        lastName: data.fullName.split(' ')[1] || "",
+        email: data.email || "",
+        mobile: data.phone || "",
+        gender: data.gender || "male",
+      })
+    }
+    loadUserData()
+  }, [form])
+
+  async function onSubmit(values) {
+    setIsSaving(true)
+    toast
+      .promise(
+        updateUserProfile(values),
+        {
+          loading: "Updating profile...",
+          success: "Profile updated successfully!",
+          error: (err) => `Error: ${err.message}`,
+        },
+        {
+          style: {
+            minWidth: "250px",
+          },
+          success: {
+            duration: 5000,
+            icon: "🎉",
+          },
+        },
+      )
+      .finally(() => setIsSaving(false))
+  }
+
+  if (!userData) {
+    return <div>Loading...</div>
+  }
 
   return (
     <div className="max-w-2xl mx-auto p-6">
+      <Toaster position="top-center" reverseOrder={false} />
       <Form {...form}>
-        <form className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
@@ -134,29 +165,7 @@ export default function UserProfile() {
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
-                  <Button variant="outline" className="text-blue-600">
-                    CHANGE
-                  </Button>
                 </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="dob"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>DOB</FormLabel>
-                <FormControl>
-                  <Input
-                    type="date"
-                    {...field}
-                    value={field.value ? format(field.value, "yyyy-MM-dd") : ""}
-                    onChange={(e) => field.onChange(e.target.valueAsDate)}
-                  />
-                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -206,18 +215,11 @@ export default function UserProfile() {
             />
           </div>
 
-   
-
           <Button type="submit" className="w-full" disabled={isSaving}>
             {isSaving ? "Saving..." : "SAVE CHANGES"}
           </Button>
         </form>
       </Form>
-
-      <p className="text-sm text-gray-500 mt-4">
-        Share your DOB to get special gifts on the 1st day of your birthday month
-      </p>
     </div>
   )
 }
-
