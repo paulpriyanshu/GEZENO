@@ -22,7 +22,7 @@ const formSchema = z.object({
 })
 
 async function updateUserProfile(values) {
-  const response = await axios.post("http://localhost:8080/api/update-profile", {
+  const response = await axios.post("https://backend.gezeno.in/api/update-profile", {
       username: `${values.firstName} ${values.lastName}`.trim(),
       email: values.email,
       phone: values.mobile,
@@ -38,7 +38,7 @@ async function updateUserProfile(values) {
 
 async function fetchUserData(email) {
   // Replace this with your actual API call to fetch user data
-  const response = await axios.post("http://localhost:8080/api/get-user", {
+  const response = await axios.post("https://backend.gezeno.in/api/get-user", {
     email
   })
   console.log("response", response.data)

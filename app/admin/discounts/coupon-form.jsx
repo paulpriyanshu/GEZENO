@@ -99,8 +99,8 @@ export default function CouponForm({ coupon, onSuccess }) {
     const fetchData = async () => {
       try {
         const [categoriesRes, productsRes] = await Promise.all([
-          fetch("http://localhost:8080/api/getCategories"),
-          fetch("http://localhost:8080/api/getProducts"),
+          fetch("https://backend.gezeno.in/api/getCategories"),
+          fetch("https://backend.gezeno.in/api/getProducts"),
         ])
 
         if (!categoriesRes.ok || !productsRes.ok) {
@@ -127,8 +127,8 @@ export default function CouponForm({ coupon, onSuccess }) {
   async function onSubmit(values) {
     try {
       const url = coupon
-        ? `http://localhost:8080/api/updateCoupon/${coupon._id}`
-        : "http://localhost:8080/api/createCoupon"
+        ? `https://backend.gezeno.in/api/updateCoupon/${coupon._id}`
+        : "https://backend.gezeno.in/api/createCoupon"
 
       const response = await fetch(url, {
         method: coupon ? "POST" : "POST",

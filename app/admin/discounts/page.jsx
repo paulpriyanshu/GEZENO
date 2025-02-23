@@ -26,7 +26,7 @@ export default function Page() {
 
   const fetchCoupons = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/getAllCoupons")
+      const response = await fetch("https://backend.gezeno.in/api/getAllCoupons")
       const data = await response.json()
       if (data.success) {
         setCoupons(data.data)
@@ -38,7 +38,7 @@ export default function Page() {
 
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/deleteCoupon/${id}`, {
+      const response = await fetch(`https://backend.gezeno.in/api/deleteCoupon/${id}`, {
         method: "POST",
       })
       const data = await response.json()
