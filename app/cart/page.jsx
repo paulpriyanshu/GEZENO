@@ -138,7 +138,7 @@ export default function CartPage() {
 
   const validateCoupon = async () => {
     try {
-      const response = await axios.post("http://localhost:8080/api/coupons/apply", {
+      const response = await axios.post("https://backend.gezeno.in/api/coupons/apply", {
         couponCode,
         userId: Cookie.get("userId"), // Assuming you store userId in cookies
         orderValue: cartProducts.reduce((total, item) => total + item.price * item.quantity, 0),
