@@ -9,6 +9,7 @@ import NavBar from "@/components/NavBar"
 import axios from "axios"
 import { useRouter } from "next/navigation"
 import Cookie from "js-cookie"
+import { Input } from "@/components/ui/Input"
 
 export default function CartPage() {
   const [NavBarData, setNavBarData] = useState([])
@@ -18,6 +19,10 @@ export default function CartPage() {
   const [cartLoading, setCartLoading] = useState(true)
   const [hasInitialFetch, setHasInitialFetch] = useState(false)
   const router = useRouter()
+  const [showCouponInput, setShowCouponInput] = useState(false)
+  const [couponCode, setCouponCode] = useState("")
+  const [couponError, setCouponError] = useState("")
+  const [appliedDiscount, setAppliedDiscount] = useState(0)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -131,6 +136,27 @@ export default function CartPage() {
     }
   }, [hasInitialFetch, cartItems, cartProducts.length])
 
+  const validateCoupon = async () => {
+    try {
+      const response = await axios.post("http://localhost:8080/api/coupons/apply", {
+        couponCode,
+        userId: Cookie.get("userId"), // Assuming you store userId in cookies
+        orderValue: cartProducts.reduce((total, item) => total + item.price * item.quantity, 0),
+        categoryIds: cartProducts.map((product) => product.category),
+        productIds: cartProducts.map((product) => product._id),
+      })
+
+      if (response.data.success) {
+        setAppliedDiscount(response.data.discountAmount)
+        setCouponError("")
+        setShowCouponInput(false)
+      }
+    } catch (error) {
+      setCouponError(error.response?.data?.message || "Failed to apply coupon")
+      setAppliedDiscount(0)
+    }
+  }
+  console.log("cart products",cartProducts)
   if (isLoading) {
     return <Loading />
   }
@@ -260,11 +286,36 @@ export default function CartPage() {
 
             {/* Coupon Section */}
             <div className="bg-[#f0f7f7] rounded-lg">
-              <div className="px-4 py-3 flex items-center justify-between">
-                <span className="text-[#38b2ac] text-sm">Apply Coupon/Gift Card/Referral</span>
-                <Button variant="link" className="text-[#38b2ac] font-medium p-0">
-                  Redeem »
-                </Button>
+              <div className="px-4 py-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[#38b2ac] text-sm">Apply Coupon/Gift Card/Referral</span>
+                  <Button
+                    variant="link"
+                    className="text-[#38b2ac] font-medium p-0"
+                    onClick={() => setShowCouponInput(!showCouponInput)}
+                  >
+                    {showCouponInput ? "« Close" : "Redeem »"}
+                  </Button>
+                </div>
+                {showCouponInput && (
+                  <div className="mt-3 space-y-2">
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Enter coupon code"
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value)}
+                        className="bg-white"
+                      />
+                      <Button onClick={validateCoupon}>Apply</Button>
+                    </div>
+                    {couponError && <p className="text-red-500 text-sm">{couponError}</p>}
+                    {appliedDiscount > 0 && (
+                      <p className="text-green-600 text-sm">
+                        Coupon applied successfully! You saved ₹{appliedDiscount}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -284,12 +335,18 @@ export default function CartPage() {
                     {product.mrp && product.mrp > product.price && (
                       <div className="flex justify-between text-green-600 text-xs">
                         <span>Saved</span>
-                        <span>₹{Math.round((product.discountedPrice) * product.quantity)}</span>
+                        <span>₹{Math.round(product.discountedPrice * product.quantity)}</span>
                       </div>
                     )}
                   </div>
                 ))}
                 {/* Summary Totals */}
+                {appliedDiscount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Coupon Discount</span>
+                    <span className="text-green-600">- ₹{appliedDiscount}</span>
+                  </div>
+                )}
                 <div className="pt-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Total MRP (Incl. of taxes)</span>
@@ -313,7 +370,9 @@ export default function CartPage() {
                   </div>
                   <div className="flex justify-between font-bold text-sm pt-2">
                     <span>Subtotal</span>
-                    <span>₹{cartProducts.reduce((total, item) => total + item.price * item.quantity, 0)}</span>
+                    <span>
+                      ₹{cartProducts.reduce((total, item) => total + item.price * item.quantity, 0) - appliedDiscount}
+                    </span>
                   </div>
                 </div>
               </CardContent>
