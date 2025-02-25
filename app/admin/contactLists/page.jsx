@@ -28,7 +28,7 @@ export default function ContactList() {
     )
   }
   async function fetchContacts() {
-    const data=await axios.get('https://backend.gezeno.in/api/get-contacts')
+    const data=await axios.get('https://backend.gezeno.in/api/users/get-contacts')
     console.log("contact data",data)
     setContacts(data.data)
     

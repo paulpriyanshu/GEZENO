@@ -12,7 +12,7 @@ async function getCategoryData(id) {
   try {
     const [homeConfigResponse, categoryResponse] = await Promise.all([
       fetch("https://backend.gezeno.in/api/home/headers", { next: { revalidate: 3600 } }),
-      fetch(`https://backend.gezeno.in/api/productOfCategory/${id}`, { next: { revalidate: 3600 } }),
+      fetch(`https://backend.gezeno.in/api/products/productOfCategory/${id}`, { next: { revalidate: 3600 } }),
     ])
 
     if (!categoryResponse.ok) {

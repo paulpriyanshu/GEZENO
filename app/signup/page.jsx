@@ -36,7 +36,7 @@ function Page() {
 
     try {
       console.log("name",name)
-      const res = await axios.post("https://backend.gezeno.in/api/phone-number", {
+      const res = await axios.post("https://backend.gezeno.in/api/users/phone-number", {
         phone: number || mobilenumber.number,
         email: email,
         fullName: name, 

@@ -65,7 +65,7 @@ export default function SubSubCategoriesPage() {
   const fetchSubSubCategories = async () => {
     try {
       setLoading(true)
-      const response = await axios.get('https://backend.gezeno.in/api/getSubSubCategories')
+      const response = await axios.get('https://backend.gezeno.in/api/products/getSubSubCategories')
       setSubSubCategories(response.data)
       setLoading(false)
     } catch (err) {
@@ -76,7 +76,7 @@ export default function SubSubCategoriesPage() {
 
   const fetchSubCategories = async () => {
     try {
-      const response = await axios.get('https://backend.gezeno.in/api/getSubCategories')
+      const response = await axios.get('https://backend.gezeno.in/api/products/getSubCategories')
       setSubCategories(response.data)
     } catch (err) {
       console.error('Failed to fetch subcategories', err)
@@ -134,7 +134,7 @@ export default function SubSubCategoriesPage() {
         ...newSubSubCategory,
         image: newSubSubCategory.image || newSubSubCategory.imageUrl
       };
-      const response = await axios.post('https://backend.gezeno.in/api/createSubSubCategory', subSubCategoryData)
+      const response = await axios.post('https://backend.gezeno.in/api/products/createSubSubCategory', subSubCategoryData)
       if (response.status === 201) {
         await fetchSubSubCategories()
         setIsCreateModalOpen(false)
@@ -157,7 +157,7 @@ export default function SubSubCategoriesPage() {
     if (!editingSubSubCategory) return
 
     try {
-      const response = await axios.post(`https://backend.gezeno.in/api/updateSubSubCategory/${editingSubSubCategory._id}`, {
+      const response = await axios.post(`https://backend.gezeno.in/api/products/updateSubSubCategory/${editingSubSubCategory._id}`, {
         ...editingSubSubCategory,
         image: editingSubSubCategory.image || editingSubSubCategory.imageUrl
       })
@@ -181,7 +181,7 @@ export default function SubSubCategoriesPage() {
   const handleDeleteSubSubCategory = async (subSubCategoryId) => {
     setIsDeleting(true)
     try {
-      const response = await axios.post(`https://backend.gezeno.in/api/deleteSubSubCategory/${subSubCategoryId}`)
+      const response = await axios.post(`https://backend.gezeno.in/api/products/deleteSubSubCategory/${subSubCategoryId}`)
       if (response.status === 200) {
         setSubSubCategories(prevCategories => prevCategories.filter(category => category._id !== subSubCategoryId))
         toast.success('Sub-subcategory deleted successfully')

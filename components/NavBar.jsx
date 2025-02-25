@@ -36,9 +36,9 @@ export default function NavBar({ data }) {
   }, [])
 
   const userEmail = Cookies.get('cred')
-  const { data: cartData, error } = useSWR(userEmail ? `https://backend.gezeno.in/api/cart/${userEmail}` : null, fetcher, { refreshInterval: 1000 })
+  const { data: cartData, error } = useSWR(userEmail ? `https://backend.gezeno.in/api/users/cart/${userEmail}` : null, fetcher, { refreshInterval: 1000 })
 
-  const cartItemCount = cartData ? cartData.items.length : 0
+  const cartItemCount = cartData ? cartData?.items?.length : 0
 
   const handleCategoryHover = (categoryId) => {
     setHoveredCategory(categoryId)

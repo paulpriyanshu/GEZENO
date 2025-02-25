@@ -126,7 +126,7 @@ function EditCategoryModal({ category, onSave, onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      const response = await axios.post(`https://backend.gezeno.in/api/editcategory/${editedCategory._id}`, editedCategory)
+      const response = await axios.post(`https://backend.gezeno.in/api/products/editcategory/${editedCategory._id}`, editedCategory)
       if (response.data.success) {
         onSave(response.data.data)
         toast.success("Category has been updated successfully.")
@@ -279,7 +279,7 @@ function CreateCategoryModal({ onSave, onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      const response = await axios.post('https://backend.gezeno.in/api/createCategory', newCategory)
+      const response = await axios.post('https://backend.gezeno.in/api/products/createCategory', newCategory)
 
         onSave(response.data.category)
         toast.success("Category has been added successfully.")
@@ -383,7 +383,7 @@ export default function CategoryPage() {
   const fetchCategories = async () => {
     setIsLoading(true)
     try {
-      const response = await axios.get('https://backend.gezeno.in/api/getCategories')
+      const response = await axios.get('https://backend.gezeno.in/api/products/getCategories')
       setCategories(response.data)
     } catch (error) {
       console.error('Error fetching categories:', error)
@@ -395,7 +395,7 @@ export default function CategoryPage() {
 
   const deleteCategory = async (categoryId) => {
     try {
-      const response = await axios.post(`https://backend.gezeno.in/api/deletecategory/${categoryId}`)
+      const response = await axios.post(`https://backend.gezeno.in/api/products/deletecategory/${categoryId}`)
       if (response.data.success) {
         setCategories(prevCategories => prevCategories.filter(category => category._id !== categoryId))
         toast.success("Category deleted successfully.")

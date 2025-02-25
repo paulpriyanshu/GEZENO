@@ -34,7 +34,7 @@ export default function BrandsPage() {
   const fetchBrands = async () => {
     try {
       setIsLoading(true)
-      const response = await axios.get('https://backend.gezeno.in/api/getallbrands')
+      const response = await axios.get('https://backend.gezeno.in/api/products/getallbrands')
       if (response.data.success && Array.isArray(response.data.data)) {
         setBrands(response.data.data)
       } else {

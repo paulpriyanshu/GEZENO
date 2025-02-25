@@ -76,7 +76,7 @@ export default function HomePageEditor() {
     try {
       setIsLoading(true)
       const [categoriesResponse, homeDataResponse] = await Promise.all([
-        axios.get('https://backend.gezeno.in/api/getOnlyCategories'),
+        axios.get('https://backend.gezeno.in/api/products/getOnlyCategories'),
         axios.get('https://backend.gezeno.in/api/home/config')
       ])
       const categories = categoriesResponse.data
@@ -181,7 +181,7 @@ export default function HomePageEditor() {
 
   const fetchSubcategories = async (categoryId, stateKey) => {
     try {
-      const response = await axios.get(`https://backend.gezeno.in/api/getsubcategories/${categoryId}`)
+      const response = await axios.get(`https://backend.gezeno.in/api/products/getsubcategories/${categoryId}`)
       setSubcategories(prev => ({ ...prev, [stateKey]: response.data }))
     } catch (error) {
       console.error('Error fetching subcategories:', error)
@@ -192,7 +192,7 @@ export default function HomePageEditor() {
   const fetchSubSubcategories = async (subcategoryId, stateKey) => {
     try {
       // console.log("fetching subsubcategories",subcategoryId)
-      const response = await axios.get(`https://backend.gezeno.in/api/getsubsubcategories/${subcategoryId}`)
+      const response = await axios.get(`https://backend.gezeno.in/api/products/getsubsubcategories/${subcategoryId}`)
       setSubSubcategories(prev => ({ ...prev, [stateKey]: response.data }))
     } catch (error) {
       console.error('Error fetching sub-subcategories:', error)
@@ -202,7 +202,7 @@ export default function HomePageEditor() {
 
   const fetchSubSubSubcategories = async (subSubcategoryId, stateKey) => {
     try {
-      const response = await axios.get(`https://backend.gezeno.in/api/getsubsubsubcategories/${subSubcategoryId}`)
+      const response = await axios.get(`https://backend.gezeno.in/api/products/getsubsubsubcategories/${subSubcategoryId}`)
       setSubSubSubcategories(prev => ({ ...prev, [stateKey]: response.data }))
     } catch (error) {
       console.error('Error fetching sub-sub-subcategories:', error)

@@ -5,7 +5,7 @@ export default async function getHomeData() {
       fetch("https://backend.gezeno.in/api/home/config").then((res) => res.json()),
       fetch("https://backend.gezeno.in/api/submenu").then((res) => res.json()),
       fetch("https://backend.gezeno.in/api/home/headers").then((res) => res.json()),
-      fetch("https://backend.gezeno.in/api/getOnlyCategories").then((res)=>res.json())
+      fetch("https://backend.gezeno.in/api/products/getOnlyCategories").then((res)=>res.json())
     ]);
 
     // Return the data after all promises are resolved

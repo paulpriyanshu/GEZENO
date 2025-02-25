@@ -30,7 +30,7 @@ function Page() {
     setLoading(true) // Show loading state
     try {
       // console.log("this email has been set", email)
-      const response = await axios.post('https://backend.gezeno.in/api/verify-otp', { email, otp })
+      const response = await axios.post('https://backend.gezeno.in/api/users/verify-otp', { email, otp })
 
       if (response.data.success) {
         // console.log('Logged in successfully:', response.data)
@@ -55,7 +55,7 @@ function Page() {
     try {
       setIsResendDisabled(true)
       setResendTime(120) // Reset countdown to 2 minutes
-      await axios.post('https://backend.gezeno.in/api/resend-otp', { email })
+      await axios.post('https://backend.gezeno.in/api/users/resend-otp', { email })
       toast.success('OTP resent successfully!')
     } catch (error) {
       toast.error('Failed to resend OTP. Please try again.')

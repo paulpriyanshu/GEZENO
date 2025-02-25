@@ -46,7 +46,7 @@ export default function MenuItemsPage() {
     try {
       setIsLoading(true)
       const [categoriesResponse, menuItemsResponse] = await Promise.all([
-        axios.get('https://backend.gezeno.in/api/getOnlyCategories'),
+        axios.get('https://backend.gezeno.in/api/products/getOnlyCategories'),
         axios.get('https://backend.gezeno.in/api/submenu')
       ])
       setCategories(categoriesResponse.data)
@@ -76,7 +76,7 @@ export default function MenuItemsPage() {
 
   const fetchSubcategories = async (categoryId) => {
     try {
-      const response = await axios.get(`https://backend.gezeno.in/api/getsubcategories/${categoryId}`)
+      const response = await axios.get(`https://backend.gezeno.in/api/products/getsubcategories/${categoryId}`)
       setSubcategories(response.data.subCategories || [])
     } catch (error) {
       console.error('Error fetching subcategories:', error)
@@ -86,7 +86,7 @@ export default function MenuItemsPage() {
 
   const fetchSubSubcategories = async (subcategoryId) => {
     try {
-      const response = await axios.get(`https://backend.gezeno.in/api/getsubsubcategories/${subcategoryId}`)
+      const response = await axios.get(`https://backend.gezeno.in/api/products/getsubsubcategories/${subcategoryId}`)
       setSubsubcategories(response.data.subSubCategories || [])
     } catch (error) {
       console.error('Error fetching sub-subcategories:', error)
@@ -96,7 +96,7 @@ export default function MenuItemsPage() {
 
   const fetchSubSubSubcategories = async (subSubcategoryId) => {
     try {
-      const response = await axios.get(`https://backend.gezeno.in/api/getsubsubsubcategories/${subSubcategoryId}`)
+      const response = await axios.get(`https://backend.gezeno.in/api/products/getsubsubsubcategories/${subSubcategoryId}`)
       setSubsubsubcategories(response.data.subSubSubCategories || [])
     } catch (error) {
       console.error('Error fetching sub-sub-subcategories:', error)
@@ -138,7 +138,7 @@ export default function MenuItemsPage() {
                            selectedSubsubcategory ? 'SubSubCategory' :
                            selectedSubcategory ? 'SubCategory' : 'ParentCategory'
       
-      const response = await axios.post('https://backend.gezeno.in/api/submenu', {
+      const response = await axios.post('https://backend.gezeno.in/api/products/submenu', {
         categoryId,
         categoryType
       })
@@ -163,7 +163,7 @@ export default function MenuItemsPage() {
 
   const removeMenuItem = async (id) => {
     try {
-      await axios.post(`https://backend.gezeno.in/api/submenu/${id}`)
+      await axios.post(`https://backend.gezeno.in/api/products/submenu/${id}`)
       setMenuItems(menuItems.filter(item => item._id !== id))
       toast.success('Menu item category removed successfully')
     } catch (error) {
@@ -218,7 +218,7 @@ export default function MenuItemsPage() {
     try {
       const categoryId = selectedSubsubsubcategory || selectedSubsubcategory || selectedSubcategory || selectedCategory
       
-      const response = await axios.post(`https://backend.gezeno.in/api/editsubmenu/${editingItem._id}`, {
+      const response = await axios.post(`https://backend.gezeno.in/api/products/editsubmenu/${editingItem._id}`, {
         categoryId
       })
 

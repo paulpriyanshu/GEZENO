@@ -27,8 +27,8 @@ export default function AdminSideBar() {
   useEffect(() => {
     const fetchBrands = async () => {
       try {
-        const activeResponse = await fetch('https://backend.gezeno.in/api/getactivebrands');
-        const inactiveResponse = await fetch('https://backend.gezeno.in/api/getinactivebrands');
+        const activeResponse = await fetch('https://backend.gezeno.in/api/products/getactivebrands');
+        const inactiveResponse = await fetch('https://backend.gezeno.in/api/products/getinactivebrands');
 
         const activeData = await activeResponse.json();
         const inactiveData = await inactiveResponse.json();

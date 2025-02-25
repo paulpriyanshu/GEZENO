@@ -25,7 +25,7 @@ export default function CartPage() {
   const [showCouponInput, setShowCouponInput] = useState(false)
   const [couponCode, setCouponCode] = useState("")
   const [couponError, setCouponError] = useState("")
-  const [newTotal,setNewTotal]=useState(null)
+  const [newTotal, setNewTotal] = useState(null)
   const router = useRouter()
   const userEmail = Cookie.get("cred")
 
@@ -44,12 +44,12 @@ export default function CartPage() {
     error: cartError,
     isLoading: cartLoading,
     mutate: mutateCart,
-  } = useSWR(userEmail ? `https://backend.gezeno.in/api/cart/${userEmail}` : null, fetcher, {
+  } = useSWR(userEmail ? `https://backend.gezeno.in/api/users/cart/${userEmail}` : null, fetcher, {
     refreshInterval: 2000, // Refresh every 10 seconds
     revalidateOnFocus: true,
     dedupingInterval: 5000,
   })
-  console.log("original cart",cart)
+  console.log("original cart", cart)
   const cartProducts =
     cart?.items?.map((item) => ({
       ...item.product,
@@ -138,7 +138,7 @@ export default function CartPage() {
       const orderValue = cartProducts.reduce((total, item) => total + item.price * item.quantity, 0)
 
       // Call coupon validation API
-      console.log("category", categoryIds, "product", productIds, "coupon", couponCode)
+      console.log("category", categoryIds, "product", productIds, "coupon", couponCode, "ordderValue", orderValue)
       const response = await axios.post("https://backend.gezeno.in/api/apply", {
         email: userEmail,
         couponCode,
@@ -146,17 +146,17 @@ export default function CartPage() {
         categoryIds,
         productIds,
       })
-      console.log("coupon repsonse",response)
+      console.log("coupon repsonse", response)
 
       if (response.data.success) {
-         setCouponError("")
-         setNewTotal(response.data.total)
-         console.log("new total",response.data.updatedCart.total)
+        setCouponError("")
+        setNewTotal(response.data.total)
+        console.log("new total", response.data.updatedCart.total)
         setShowCouponInput(false)
         mutateCart()
       }
     } catch (error) {
-      console.log("error",error)
+      console.log("error", error)
       setCouponError(error.response?.data?.message || "Failed to apply coupon")
     }
   }
@@ -213,7 +213,23 @@ export default function CartPage() {
   }
 
   // Show error state
-  if (cartError) {
+  if (cartError?.response?.status === 404 && cartError?.response?.data?.message === "Cart is empty") {
+    return (
+      <div className="min-h-screen bg-white p-4">
+        <div className="hidden md:block">
+          <NavBar data={NavBarData} />
+        </div>
+        <div className="container mx-auto mt-8">
+          <div className="text-center p-8 border rounded-lg">
+            <p className="text-gray-500">Your cart is empty</p>
+            <Link href="/products" className="text-primary hover:underline mt-2 inline-block">
+              Continue Shopping
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  } else if (cartError) {
     return (
       <div className="min-h-screen bg-white p-4">
         <div className="hidden md:block">
@@ -416,7 +432,7 @@ export default function CartPage() {
                 {appliedDiscount > 0 && (
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Coupon Discount</span>
-                    <span className="text-green-600">- ₹{appliedDiscount}</span>
+                    <span className="text-green-600">- ₹{appliedDiscount.toFixed(2)}</span>
                   </div>
                 )}
 

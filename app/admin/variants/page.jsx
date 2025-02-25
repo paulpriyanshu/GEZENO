@@ -19,7 +19,7 @@ export default function Component() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("https://backend.gezeno.in/api/getProducts")
+        const response = await axios.get("https://backend.gezeno.in/api/products/getProducts")
         setProducts(response.data)
       } catch (error) {
         console.error("Error fetching products:", error)
@@ -40,7 +40,7 @@ export default function Component() {
     }
 
     try {
-      const response = await axios.post(`https://backend.gezeno.in/api/products/${parentProduct}/add-variant/${variantProduct}`)
+      const response = await axios.post(`https://backend.gezeno.in/api/products/products/${parentProduct}/add-variant/${variantProduct}`)
       console.log("Variant added successfully:", response.data)
       setNotification({ type: "success", message: "Variant added successfully!" })
       // Reset form

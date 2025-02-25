@@ -43,7 +43,7 @@ export default function AdminPage() {
 
   const fetchCategories = useCallback(async () => {
     try {
-      const response = await axios.get('https://backend.gezeno.in/api/getOnlyCategories')
+      const response = await axios.get('https://backend.gezeno.in/api/products/getOnlyCategories')
       setCategories(response.data)
     } catch (error) {
       console.error('Error fetching categories:', error)
@@ -57,7 +57,7 @@ export default function AdminPage() {
 
   const fetchSubcategories = async (categoryId) => {
     try {
-      const response = await axios.get(`https://backend.gezeno.in/api/getsubcategories/${categoryId}`)
+      const response = await axios.get(`https://backend.gezeno.in/api/products/getsubcategories/${categoryId}`)
       setSubcategories(response.data.subCategories || [])
     } catch (error) {
       console.error('Error fetching subcategories:', error)
@@ -67,7 +67,7 @@ export default function AdminPage() {
 
   const fetchSubSubcategories = async (subcategoryId) => {
     try {
-      const response = await axios.get(`https://backend.gezeno.in/api/getsubsubcategories/${subcategoryId}`)
+      const response = await axios.get(`https://backend.gezeno.in/api/products/getsubsubcategories/${subcategoryId}`)
       setSubsubcategories(response.data.subSubCategories || [])
     } catch (error) {
       console.error('Error fetching sub-subcategories:', error)
@@ -77,7 +77,7 @@ export default function AdminPage() {
 
   const fetchSubSubSubcategories = async (subSubcategoryId) => {
     try {
-      const response = await axios.get(`https://backend.gezeno.in/api/getsubsubsubcategories/${subSubcategoryId}`)
+      const response = await axios.get(`https://backend.gezeno.in/api/products/getsubsubsubcategories/${subSubcategoryId}`)
       setSubsubsubcategories(response.data.subSubSubCategories || [])
     } catch (error) {
       console.error('Error fetching sub-sub-subcategories:', error)
@@ -114,7 +114,7 @@ export default function AdminPage() {
 
     setIsSavingCategory(true)
     try {
-      const response = await axios.post('https://backend.gezeno.in/api/addcategory', {
+      const response = await axios.post('https://backend.gezeno.in/api/products/addcategory', {
         name: newCategoryName,
         parentId: selectedSubsubsubcategory || selectedSubsubcategory || selectedSubcategory || selectedCategory || null
       })

@@ -90,11 +90,11 @@ export default function ProductManagement() {
       setLoading(true)
       try {
         const [productsRes, categoriesRes, brandsRes, filtersRes, sizesRes] = await Promise.all([
-          axios.get('https://backend.gezeno.in/api/getProducts'),
-          axios.get('https://backend.gezeno.in/api/getCategories'),
-          axios.get('https://backend.gezeno.in/api/getallbrands'),
-          axios.get('https://backend.gezeno.in/api/filters'),
-          axios.get('https://backend.gezeno.in/api/sizes')
+          axios.get('https://backend.gezeno.in/api/products/getProducts'),
+          axios.get('https://backend.gezeno.in/api/products/getCategories'),
+          axios.get('https://backend.gezeno.in/api/products/getallbrands'),
+          axios.get('https://backend.gezeno.in/api/products/filters'),
+          axios.get('https://backend.gezeno.in/api/products/sizes')
         ])
         // console.log("this is product res data",productsRes.data)
         setProducts(productsRes.data)
@@ -146,7 +146,7 @@ export default function ProductManagement() {
 
   const handleDeleteProduct = async (id) => {
     try {
-      await axios.post(`https://backend.gezeno.in/api/deleteproduct/${id}`)
+      await axios.post(`https://backend.gezeno.in/api/products/deleteproduct/${id}`)
       setProducts(products.filter(product => product._id !== id))
       setFilteredProducts(filteredProducts.filter(product => product._id !== id))
       showNotification("Product deleted successfully")
@@ -356,9 +356,10 @@ export default function ProductManagement() {
 
       let productResponse
       if (isEditing) {
-        productResponse = await axios.post(`https://backend.gezeno.in/api/update-product/${currentProduct._id}`, productData)
+        console.log("this",productData)
+        productResponse = await axios.post(`https://backend.gezeno.in/api/products/Update-Product/${currentProduct._id}`, productData)
       } else {
-        productResponse = await axios.post('https://backend.gezeno.in/api/createProduct', productData)
+        productResponse = await axios.post('https://backend.gezeno.in/api/products/createProduct', productData)
       }
 
       if (variantFormData.variantName) {
@@ -381,7 +382,7 @@ export default function ProductManagement() {
         }
 
         try {
-          await axios.post('https://backend.gezeno.in/api/create-product-variant', variantPayload)
+          await axios.post('https://backend.gezeno.in/api/products/create-product-variant', variantPayload)
           showNotification("Product and variant created successfully")
         } catch (variantError) {
           console.error('Error creating variant:', variantError)
@@ -391,7 +392,7 @@ export default function ProductManagement() {
         showNotification(isEditing ? "Product updated successfully" : "Product created successfully")
       }
 
-      const updatedProducts = await axios.get('https://backend.gezeno.in/api/getProducts')
+      const updatedProducts = await axios.get('https://backend.gezeno.in/api/products/getProducts')
       setProducts(updatedProducts.data)
       setFilteredProducts(updatedProducts.data)
       
@@ -530,7 +531,7 @@ export default function ProductManagement() {
   
     try {
       setLoading(true);
-      const response = await axios.get(`https://backend.gezeno.in/api/get-product-variants/${productId}`);
+      const response = await axios.get(`https://backend.gezeno.in/api/products/get-product-variants/${productId}`);
       const updatedProducts = products.map(product => {
         if (product._id === productId) {
           return { ...product, variants: response.data.data || [] };
@@ -631,7 +632,7 @@ export default function ProductManagement() {
     
     try {
       const uploadPromises = files.map(async (file) => {
-        const uploadUrlResponse = await axios.get(`https://backend.gezeno.in/api/imageUpload/${file.name}`)
+        const uploadUrlResponse = await axios.get(`https://backend.gezeno.in/api/products/imageUpload/${file.name}`)
         const { url, filename } = uploadUrlResponse.data
 
         await axios.put(url, file, {
@@ -642,7 +643,7 @@ export default function ProductManagement() {
           }
         })
 
-        const previewResponse = await axios.get(`https://backend.gezeno.in/api/image/${filename}`)
+        const previewResponse = await axios.get(`https://backend.gezeno.in/api/products/image/${filename}`)
         
         return { url: previewResponse.data.url, filename }
       })
@@ -692,7 +693,7 @@ export default function ProductManagement() {
         filters: variantFormData.filters
       }
 
-      const response = await axios.post('https://backend.gezeno.in/api/create-product-variant', variantPayload)
+      const response = await axios.post('https://backend.gezeno.in/api/products/create-product-variant', variantPayload)
       showNotification("Variant added successfully")
       
       // Update the product's variants
@@ -724,7 +725,7 @@ export default function ProductManagement() {
   const handleVariantSubmit = async () => {
     try {
       setLoading(true)
-      const response = await axios.post(`https://backend.gezeno.in/api/edit-product-variant/${editingVariant._id}`, {
+      const response = await axios.post(`https://backend.gezeno.in/api/products/edit-product-variant/${editingVariant._id}`, {
         variantName: editingVariant.variantName,
         variantPrice: editingVariant.variantPrice,
         sizes: editingVariant.sizes,
@@ -764,7 +765,7 @@ export default function ProductManagement() {
   const handleDeleteVariant = async (variantId, productId) => {
     try {
       setLoading(true)
-      const response = await axios.post(`https://backend.gezeno.in/api/delete-product-variant/${variantId}`)
+      const response = await axios.post(`https://backend.gezeno.in/api/products/delete-product-variant/${variantId}`)
       if (response.status === 200) {
         const updatedProducts = products.map(product => {
           if (product._id === productId) {

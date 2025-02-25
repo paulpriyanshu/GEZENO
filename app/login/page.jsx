@@ -26,7 +26,7 @@ function LoginPage() {
     setError("")
 
     try {
-      const response = await axios.post("https://backend.gezeno.in/api/login-with-email", { email })
+      const response = await axios.post("https://backend.gezeno.in/api/users/login-with-email", { email })
 
       if (response.data.message === "OTP sent. Please verify your OTP.") {
         // Store the userId in localStorage or in a state management solution

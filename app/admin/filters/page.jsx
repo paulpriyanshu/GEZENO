@@ -27,7 +27,7 @@ export default function Component() {
   const fetchExistingFilters = async () => {
     try {
       setIsLoading(true)
-      const response = await axios.get('https://backend.gezeno.in/api/filters')
+      const response = await axios.get('https://backend.gezeno.in/api/products/filters')
       setExistingFilters(response.data.filters)
     } catch (error) {
       console.error('Error fetching filters:', error)
@@ -103,7 +103,7 @@ export default function Component() {
     }
     console.log("filters", section.tags.filter(tag => tag.trim()))
     try {
-      const response = await axios.post('https://backend.gezeno.in/api/filters', {
+      const response = await axios.post('https://backend.gezeno.in/api/products/filters', {
         name: section.name,
         tags: section.tags.filter(tag => tag.trim())
       })
@@ -161,7 +161,7 @@ export default function Component() {
 
   const saveEditedFilter = async () => {
     try {
-      const response = await axios.post(`https://backend.gezeno.in/api/editfilters/${editingFilter._id}`, {
+      const response = await axios.post(`https://backend.gezeno.in/api/products/editfilters/${editingFilter._id}`, {
         name: editingFilter.name,
         tags: editingFilter.tags.filter(tag => tag.trim()),
         // removeTags: removedTags
@@ -182,7 +182,7 @@ export default function Component() {
 
   const deleteFilter = async (filterId) => {
     try {
-      await axios.post(`https://backend.gezeno.in/api/filters/${filterId}`)
+      await axios.post(`https://backend.gezeno.in/api/products/filters/${filterId}`)
       toast.success("Filter deleted successfully")
       fetchExistingFilters()
       closeEditModal()

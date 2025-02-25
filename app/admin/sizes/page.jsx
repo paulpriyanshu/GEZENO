@@ -26,7 +26,7 @@ export default function SizeManagement() {
   const fetchExistingSizes = async () => {
     try {
       setIsLoading(true)
-      const response = await axios.get('https://backend.gezeno.in/api/sizes')
+      const response = await axios.get('https://backend.gezeno.in/api/products/sizes')
       setExistingSizes(response.data.sizes)
     } catch (error) {
       console.error('Error fetching sizes:', error)
@@ -102,7 +102,7 @@ export default function SizeManagement() {
     }
 
     try {
-      const response = await axios.post('https://backend.gezeno.in/api/sizes', {
+      const response = await axios.post('https://backend.gezeno.in/products/api/sizes', {
         name: section.name,
         tags: section.tags.filter(tag => tag.trim())
       })
@@ -164,7 +164,7 @@ export default function SizeManagement() {
 
   const saveEditedSize = async () => {
     try {
-      const response = await axios.post(`https://backend.gezeno.in/api/sizes/${editingSize._id}`, {
+      const response = await axios.post(`https://backend.gezeno.in/api/products/sizes/${editingSize._id}`, {
         name: editingSize.name,
         tags: editingSize.tags.filter(tag => tag.trim())
       })
@@ -184,7 +184,7 @@ export default function SizeManagement() {
 
   const deleteSize = async (sizeId) => {
     try {
-      await axios.delete(`https://backend.gezeno.in/api/sizes/${sizeId}`)
+      await axios.delete(`https://backend.gezeno.in/api/products/sizes/${sizeId}`)
       toast.success("Size category deleted successfully")
       fetchExistingSizes()
       closeEditModal()

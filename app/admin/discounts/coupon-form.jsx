@@ -99,8 +99,8 @@ export default function CouponForm({ coupon, onSuccess }) {
     const fetchData = async () => {
       try {
         const [categoriesRes, productsRes] = await Promise.all([
-          fetch("https://backend.gezeno.in/api/getCategories"),
-          fetch("https://backend.gezeno.in/api/getProducts"),
+          fetch("https://backend.gezeno.in/api/products/getCategories"),
+          fetch("https://backend.gezeno.in/api/products/getProducts"),
         ])
 
         if (!categoriesRes.ok || !productsRes.ok) {

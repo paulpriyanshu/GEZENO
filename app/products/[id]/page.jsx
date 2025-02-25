@@ -7,7 +7,7 @@ import RelatedProducts from "./related-products"
 import axios from "axios"
 
 async function getProduct(id) {
-  const res = await fetch(`https://backend.gezeno.in/api/products/${id}`,{
+  const res = await fetch(`https://backend.gezeno.in/api/products/products/${id}`,{
     next:{revalidate: 5},
     cache: 'no-store'
   })
@@ -16,7 +16,7 @@ async function getProduct(id) {
 }
 
 async function getRelatedProducts(category) {
-  const res = await fetch(`https://backend.gezeno.in/api/productOfCategory/${category}`)
+  const res = await fetch(`https://backend.gezeno.in/api/products/productOfCategory/${category}`)
 
     console.log("category",res.data)
   return res.json()

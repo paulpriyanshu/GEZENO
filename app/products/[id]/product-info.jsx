@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils"
 import Reviews from "./reviews"
 import { toast } from "react-hot-toast"
 import Cookie from "js-cookie"
+import axios from "axios"
 const dropdownVariants = {
   hidden: { height: 0, opacity: 0 },
   visible: { height: "auto", opacity: 1 },
@@ -146,25 +147,20 @@ export default function ProductInfo({ product }) {
 
       setIsLoading(true)
 
-      const response = await fetch("https://backend.gezeno.in/api/addToCart", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const data = await axios.post("https://backend.gezeno.in/api/users/addToCart", {
+
           email, // Replace with actual user ID/email
           productId: product._id,
           quantity: 1,
           price: product.price,
           size: selectedSize, // Add the selected size to the request
-        }),
       })
 
-      if (!response.ok) {
+      if (!data) {
         throw new Error("Failed to add item to cart")
       }
 
-      const data = await response.json()
+      // const data = await response.json()
       toast.success("Added to bag successfully")
     } catch (error) {
       console.error("Error adding to cart:", error)

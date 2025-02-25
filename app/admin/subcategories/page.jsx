@@ -59,7 +59,7 @@ export default function SubCategoriesPage() {
   const fetchCategories = async () => {
     try {
       setLoading(true)
-      const response = await axios.get('https://backend.gezeno.in/api/getCategories')
+      const response = await axios.get('https://backend.gezeno.in/api/products/getCategories')
       setCategories(response.data)
       console.log(response.data)
       setLoading(false)
@@ -121,7 +121,7 @@ export default function SubCategoriesPage() {
         image: newSubCategory.image || newSubCategory.imageUrl
       };
 
-      const response = await axios.post('https://backend.gezeno.in/api/createSubCategory', subCategoryData)
+      const response = await axios.post('https://backend.gezeno.in/api/products/createSubCategory', subCategoryData)
       if (response.status === 201) {
         await fetchCategories()
         setIsCreateModalOpen(false)
@@ -146,7 +146,7 @@ export default function SubCategoriesPage() {
     if (!editingSubCategory) return
 
     try {
-      const response = await axios.post(`https://backend.gezeno.in/api/updateSubCategory/${editingSubCategory._id}`, {
+      const response = await axios.post(`https://backend.gezeno.in/api/products/updateSubCategory/${editingSubCategory._id}`, {
         ...editingSubCategory,
         image: editingSubCategory.image || editingSubCategory.imageUrl
       })
@@ -170,7 +170,7 @@ export default function SubCategoriesPage() {
   const handleDeleteSubCategory = async (subCategoryId) => {
     if (window.confirm('Are you sure you want to delete this sub-category?')) {
       try {
-        const response = await axios.post(`https://backend.gezeno.in/api/deleteSubCategory/${subCategoryId}`)
+        const response = await axios.post(`https://backend.gezeno.in/api/products/deleteSubCategory/${subCategoryId}`)
         if (response.data.success) {
           await fetchCategories()
           toast.success('Sub-category deleted successfully')

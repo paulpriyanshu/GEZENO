@@ -7,64 +7,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PieChart, Menu, Search, ChevronDown, ChevronUp } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Badge } from "@/components/ui/badge"
 import axios from "axios"
-import { responsive_second } from "@/components/ResponsiveFeatures"
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState([])
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [expandedOrders, setExpandedOrders] = useState({})
   const [shippingStatuses, setShippingStatuses] = useState({})
-  const [orderData, setOrderData] = useState({
-    order_id: "",
-    order_date: "",
-    pickup_location: "",
-    channel_id: "",
-    comment: "",
-    billing_customer_name: "",
-    billing_last_name: "",
-    billing_address: "",
-    billing_address_2: "",
-    billing_city: "",
-    billing_pincode: "",
-    billing_state: "",
-    billing_country: "",
-    billing_email: "",
-    billing_phone: "",
-    shipping_is_billing: true,
-    shipping_customer_name: "",
-    shipping_last_name: "",
-    shipping_address: "",
-    shipping_address_2: "",
-    shipping_city: "",
-    shipping_pincode: "",
-    shipping_country: "",
-    shipping_state: "",
-    shipping_email: "",
-    shipping_phone: "",
-    order_items: [
-      {
-        name: "",
-        sku: "",
-        units: 0,
-        selling_price: "",
-        discount: "",
-        tax: "",
-        hsn: "",
-      },
-    ],
-    payment_method: "",
-    shipping_charges: 0,
-    giftwrap_charges: 0,
-    transaction_charges: 0,
-    total_discount: 0,
-    sub_total: 0,
-    length: 0,
-    breadth: 0,
-    height: 0,
-    weight: 0,
-  })
-
   const [adminToken, setAdminToken] = useState("") // Add state for admin token
 
   useEffect(() => {
@@ -73,7 +23,7 @@ export default function OrdersPage() {
       try {
         // const response = await fetch("/api/admin/token") // Replace with your token endpoint
         // const data = await response.json()
-        setAdminToken(localStorage.getItem('shippingToken'))
+        setAdminToken(localStorage.getItem("shippingToken"))
       } catch (error) {
         console.error("Error fetching admin token:", error)
       }
@@ -84,7 +34,7 @@ export default function OrdersPage() {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch("https://backend.gezeno.in/api/orders")
+      const response = await fetch("https://backend.gezeno.in/api/orders/orders")
       const data = await response.json()
       setOrders(data.orders)
       // Initialize shipping statuses
@@ -106,11 +56,11 @@ export default function OrdersPage() {
   }
 
   const handleShipOrder = async (order) => {
-    console.log("Admin Token:", adminToken);
-    
+    console.log("Admin Token:", adminToken)
+
     try {
-      console.log("Original Order:", order);
-  
+      console.log("Original Order:", order)
+
       // Format order data for Shiprocket API
       const formattedOrderData = {
         token: adminToken, // Include token in body instead of headers
@@ -119,89 +69,82 @@ export default function OrdersPage() {
         pickup_location: "Primary",
         channel_id: "",
         comment: "Order from website",
-        billing_customer_name: order.user.name || order.user.email.split("@")[0],
+        billing_customer_name: order.user?.name || order.user?.email?.split("@")[0] || "",
         billing_last_name: "",
-        billing_address: order.shippingInfo.street,
+        billing_address: order.shippingInfo?.street || "",
         billing_address_2: "",
-        billing_city: order.shippingInfo.city,
-        billing_pincode: order.shippingInfo.pincode,
-        billing_state: order.user.address.state || "",
-        billing_country: order.shippingInfo.country,
-        billing_email: order.user.email,
-        billing_phone: order.user.phone || "",
+        billing_city: order.shippingInfo?.city || "",
+        billing_pincode: order.shippingInfo?.pincode || "",
+        billing_state: order.user?.address?.state || "",
+        billing_country: order.shippingInfo?.country || "India",
+        billing_email: order.user?.email || "",
+        billing_phone: order.user?.phone || "",
         shipping_is_billing: true,
-        shipping_customer_name: order.user.name || order.user.email.split("@")[0],
+        shipping_customer_name: order.user?.name || order.user?.email?.split("@")[0] || "",
         shipping_last_name: "",
-        shipping_address: order.shippingInfo.street,
+        shipping_address: order.shippingInfo?.street || "",
         shipping_address_2: "",
-        shipping_city: order.shippingInfo.city,
-        shipping_pincode: order.shippingInfo.pincode,
-        shipping_country: order.shippingInfo.country,
-        shipping_state: order.shippingInfo.state || "",
-        shipping_email: order.user.email,
-        shipping_phone: order.shippingInfo.phone || "",
+        shipping_city: order.shippingInfo?.city || "",
+        shipping_pincode: order.shippingInfo?.pincode || "",
+        shipping_country: order.shippingInfo?.country || "India",
+        shipping_state: order.shippingInfo?.state || "",
+        shipping_email: order.user?.email || "",
+        shipping_phone: order.shippingInfo?.phone || "",
         order_items: order.orderItems.map((item, index) => ({
           name: item.name,
-          sku: `${item.product._id}${(index + 1).toString()}`,
+          sku: `${item.product?._id || ""}${(index + 1).toString()}`,
           units: item.quantity,
-          selling_price: item.price.toString(),
-          discount: ((item.price - (item.product.discountedPrice || item.price)) * item.quantity).toString(),
+          selling_price: item.discountedPrice?.toString() || "0",
+          discount: ((item.originalPrice - item.discountedPrice) * item.quantity).toString(),
           tax: "0",
           hsn: "",
         })),
-        payment_method: order.paymentInfo.status === "paid" ? "Prepaid" : "COD",
-        shipping_charges: order.shippingPrice,
+        payment_method: order.paymentInfo?.status === "paid" ? "Prepaid" : "COD",
+        shipping_charges: order.shippingPrice || 0,
         giftwrap_charges: 0,
         transaction_charges: 0,
         total_discount: order.orderItems.reduce(
-          (sum, item) => sum + (item.price - (item.product.discountedPrice || item.price)) * item.quantity,
-          0
+          (sum, item) => sum + (item.originalPrice - item.discountedPrice) * item.quantity,
+          0,
         ),
-        sub_total: order.itemsPrice,
+        sub_total: order.itemsPrice || 0,
         length: 10,
         breadth: 15,
         height: 20,
         weight: 2.5,
-      };
-  
-      console.log("Formatted Order Data:", formattedOrderData);
-  
+      }
+
+      console.log("Formatted Order Data:", formattedOrderData)
+
       // Call your backend API instead of Shiprocket directly
-      const response = await fetch("https://backend.gezeno.in/api/shiprocket/create-order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formattedOrderData),
-      });
-    
-      const data = await response.json();
-      console.log("Shipping Response:", data);
-  
-      if (data.status === 1) {
+      const data = await axios.post("https://backend.gezeno.in/api/orders/shiprocket/create-order",formattedOrderData);
+
+      console.log("Shipping Response:", data)
+
+      if (data.data.status_code === 1) {
         setShippingStatuses((prev) => ({
           ...prev,
           [order._id]: "Shipped",
-        }));
+        }))
       } else {
         setShippingStatuses((prev) => ({
           ...prev,
           [order._id]: "Not Shipped",
-        }));
+        }))
       }
     } catch (error) {
-      console.error("Error creating shipment:", error);
+      console.error("Error creating shipment:", error)
       setShippingStatuses((prev) => ({
         ...prev,
         [order._id]: "Not Shipped",
-      }));
+      }))
     } finally {
       setShippingStatuses((prev) => ({
         ...prev,
         [order._id]: "Shipped",
-      }));
+      }))
     }
-  };
+  }
 
   const calculateOrderStats = () => {
     const totalOrders = orders.length
@@ -212,14 +155,16 @@ export default function OrdersPage() {
     const fulfilledOrders = orders.filter((order) => order.orderStatus === "Delivered").length
     const totalRevenue = orders.reduce((sum, order) => sum + order.totalPrice, 0)
     const totalDiscount = orders.reduce((sum, order) => {
-      return (
-        sum +
-        order.orderItems.reduce((itemSum, item) => {
-          const originalPrice = item.price * item.quantity
-          const discountedPrice = (item.product.discountedPrice || item.price) * item.quantity
-          return itemSum + (originalPrice - discountedPrice)
-        }, 0)
-      )
+      // Calculate discounts from coupons
+      const couponDiscount =
+        order.couponsApplied?.reduce((couponSum, coupon) => couponSum + coupon.discountAmount, 0) || 0
+
+      // Calculate product discounts
+      const productDiscount = order.orderItems.reduce((itemSum, item) => {
+        return itemSum + (item.originalPrice - item.discountedPrice) * item.quantity
+      }, 0)
+
+      return sum + couponDiscount + productDiscount
     }, 0)
 
     return [
@@ -228,7 +173,7 @@ export default function OrdersPage() {
       { label: "Total Revenue", value: `₹${totalRevenue.toFixed(2)}` },
       { label: "Total Savings", value: `₹${totalDiscount.toFixed(2)}` },
       { label: "Fulfilled orders", value: fulfilledOrders.toString() },
-      { label: "Average Order Value", value: `₹${(totalRevenue / totalOrders).toFixed(2)}` },
+      { label: "Average Order Value", value: `₹${totalOrders > 0 ? (totalRevenue / totalOrders).toFixed(2) : "0.00"}` },
     ]
   }
 
@@ -313,10 +258,9 @@ export default function OrdersPage() {
                     <TableHead className="w-[100px]">Order</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Customer</TableHead>
-                    <TableHead>Customer name</TableHead>
-                    <TableHead>Mobile No.</TableHead>
+                    <TableHead>Address</TableHead>
                     <TableHead>Total</TableHead>
-                    <TableHead>Size(s)</TableHead>
+                    <TableHead>Items</TableHead>
                     <TableHead>Payment</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Shipping Status</TableHead>
@@ -339,25 +283,19 @@ export default function OrdersPage() {
                         </TableCell>
                         <TableCell className="font-medium">{order._id.slice(-6)}</TableCell>
                         <TableCell>{new Date(order.createdAt).toLocaleString()}</TableCell>
-                        <TableCell>{order.user.email}</TableCell>
-                        <TableCell>{order.user.fullName}</TableCell>
-                        <TableCell>{order.user.phone}</TableCell>
-                        <TableCell>₹{order.totalPrice.toFixed(2)}</TableCell>
-                        <TableCell>
-                          {order.orderItems
-                            .map((item) => item.size)
-                            .filter(Boolean)
-                            .join(", ") || "N/A"}
-                        </TableCell>
+                        <TableCell>{order.user?.email || "N/A"}</TableCell>
+                        <TableCell className="max-w-[200px] truncate">{order.shippingInfo?.street || "N/A"}</TableCell>
+                        <TableCell>₹{order.totalPrice?.toFixed(2) || "0.00"}</TableCell>
+                        <TableCell>{order.orderItems?.length || 0}</TableCell>
                         <TableCell>
                           <span
                             className={`px-2 py-1 rounded-full text-xs ${
-                              order.paymentInfo.status === "paid"
+                              order.paymentInfo?.status === "paid"
                                 ? "bg-green-100 text-green-800"
                                 : "bg-yellow-100 text-yellow-800"
                             }`}
                           >
-                            {order.paymentInfo.status}
+                            {order.paymentInfo?.status || "pending"}
                           </span>
                         </TableCell>
                         <TableCell>
@@ -365,10 +303,12 @@ export default function OrdersPage() {
                             className={`px-2 py-1 rounded-full text-xs ${
                               order.orderStatus === "Delivered"
                                 ? "bg-green-100 text-green-800"
-                                : "bg-yellow-100 text-yellow-800"
+                                : order.orderStatus === "Processing"
+                                  ? "bg-blue-100 text-blue-800"
+                                  : "bg-yellow-100 text-yellow-800"
                             }`}
                           >
-                            {order.orderStatus}
+                            {order.orderStatus || "Processing"}
                           </span>
                         </TableCell>
                         <TableCell>
@@ -395,13 +335,40 @@ export default function OrdersPage() {
                         <TableRow>
                           <TableCell colSpan={10} className="bg-white">
                             <div className="p-4">
-                              <h3 className="font-semibold mb-2">Order Details</h3>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                  <h3 className="font-semibold mb-2">Customer Information</h3>
+                                  <div className="space-y-1 text-sm">
+                                    <p>
+                                      <span className="font-medium">Email:</span> {order.user?.email || "N/A"}
+                                    </p>
+                                    <p>
+                                      <span className="font-medium">Name:</span> {order.user?.fullName || "N/A"}
+                                    </p>
+                                    <p>
+                                      <span className="font-medium">Phone:</span> {order.user?.phone || "N/A"}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div>
+                                  <h3 className="font-semibold mb-2">Shipping Address</h3>
+                                  <div className="space-y-1 text-sm">
+                                    <p>{order.shippingInfo?.street || "N/A"}</p>
+                                    <p>
+                                      {order.shippingInfo?.city || "N/A"}, {order.shippingInfo?.pincode || "N/A"}
+                                    </p>
+                                    <p>{order.shippingInfo?.country || "N/A"}</p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <h3 className="font-semibold mb-2">Order Items</h3>
                               <div className="space-y-4">
-                                {order.orderItems.map((item) => (
+                                {order.orderItems?.map((item) => (
                                   <div key={item._id} className="flex items-start space-x-4 border-b pb-4">
                                     <div className="w-32 h-32 flex-shrink-0">
                                       <img
-                                        src={item.product.images[0]?.url || "/api/placeholder/96/96"}
+                                        src={item.product?.images?.[0]?.url || "/placeholder.svg?height=128&width=128"}
                                         alt={item.name}
                                         className="w-full h-full object-cover rounded"
                                       />
@@ -412,18 +379,20 @@ export default function OrdersPage() {
                                       <div className="text-sm text-gray-500">Size: {item.size || "N/A"}</div>
                                       <div className="flex items-center space-x-2 mt-1">
                                         <span className="text-lg font-semibold">
-                                          ₹{(item.product.discountedPrice || item.price).toFixed(2)}
+                                          ₹{item.discountedPrice?.toFixed(2) || "0.00"}
                                         </span>
-                                        {item.product.discountedPrice && (
+                                        {item.originalPrice !== item.discountedPrice && (
                                           <>
                                             <span className="text-sm text-gray-500 line-through">
-                                              ₹{item.price.toFixed(2)}
+                                              ₹{item.originalPrice?.toFixed(2) || "0.00"}
                                             </span>
                                             <span className="text-sm text-green-600">
-                                              {(
-                                                ((item.price - item.product.discountedPrice) / item.price) *
-                                                100
-                                              ).toFixed(0)}
+                                              {item.originalPrice > 0
+                                                ? (
+                                                    ((item.originalPrice - item.discountedPrice) / item.originalPrice) *
+                                                    100
+                                                  ).toFixed(0)
+                                                : 0}
                                               % off
                                             </span>
                                           </>
@@ -432,14 +401,118 @@ export default function OrdersPage() {
                                     </div>
                                   </div>
                                 ))}
-                                <div className="flex justify-between text-sm">
-                                  <div>
-                                    <p>Subtotal: ₹{order.itemsPrice.toFixed(2)}</p>
-                                    <p>Shipping: ₹{order.shippingPrice.toFixed(2)}</p>
-                                    <p>Tax: ₹{order.taxPrice.toFixed(2)}</p>
+                              </div>
+
+                              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <h3 className="font-semibold mb-2">Order Summary</h3>
+                                  <div className="space-y-1 border-b pb-2 mb-2">
+                                    <div className="flex justify-between">
+                                      <span>Subtotal:</span>
+                                      <span>
+                                        ₹
+                                        {order.orderItems
+                                          ?.reduce((sum, item) => sum + item.originalPrice * item.quantity, 0)
+                                          .toFixed(2) || "0.00"}
+                                      </span>
+                                    </div>
+
+                                    {order.couponsApplied && order.couponsApplied.length > 0 && (
+                                      <>
+                                        <div className="flex flex-col">
+                                          <span className="font-medium text-sm">Discounts:</span>
+                                          {order.couponsApplied.map((coupon) => (
+                                            <div key={coupon._id} className="flex justify-between pl-4 text-green-600">
+                                              <span>
+                                                <Badge variant="outline" className="mr-1">
+                                                  {coupon.code}
+                                                </Badge>
+                                              </span>
+                                              <span>-₹{coupon.discountAmount.toFixed(2)}</span>
+                                            </div>
+                                          ))}
+                                        </div>
+                                        <div className="flex justify-between font-medium">
+                                          <span>Discounted Subtotal:</span>
+                                          <span>₹{order.itemsPrice?.toFixed(2) || "0.00"}</span>
+                                        </div>
+                                      </>
+                                    )}
                                   </div>
-                                  <div className="text-right">
-                                    <p className="font-semibold text-lg">Total: ₹{order.totalPrice.toFixed(2)}</p>
+
+                                  <div className="space-y-1">
+                                    <div className="flex justify-between">
+                                      <span>Tax:</span>
+                                      <span>₹{order.taxPrice?.toFixed(2) || "0.00"}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span>Shipping:</span>
+                                      <span>₹{order.shippingPrice?.toFixed(2) || "0.00"}</span>
+                                    </div>
+                                    <div className="flex justify-between font-bold text-lg pt-1 border-t mt-1">
+                                      <span>Total:</span>
+                                      <span>₹{order.totalPrice?.toFixed(2) || "0.00"}</span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <h3 className="font-semibold mb-2">Payment & Shipping</h3>
+                                  <div className="space-y-2">
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-medium">Payment ID:</span>
+                                      <span>{order.paymentInfo?.id || "N/A"}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-medium">Payment Status:</span>
+                                      <span
+                                        className={`px-2 py-1 rounded-full text-xs ${
+                                          order.paymentInfo?.status === "paid"
+                                            ? "bg-green-100 text-green-800"
+                                            : "bg-yellow-100 text-yellow-800"
+                                        }`}
+                                      >
+                                        {order.paymentInfo?.status || "pending"}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-medium">Order Status:</span>
+                                      <span
+                                        className={`px-2 py-1 rounded-full text-xs ${
+                                          order.orderStatus === "Delivered"
+                                            ? "bg-green-100 text-green-800"
+                                            : order.orderStatus === "Processing"
+                                              ? "bg-blue-100 text-blue-800"
+                                              : "bg-yellow-100 text-yellow-800"
+                                        }`}
+                                      >
+                                        {order.orderStatus || "Processing"}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-medium">Shipping Status:</span>
+                                      {shippingStatuses[order._id] === "Shipped" ? (
+                                        <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
+                                          Shipped
+                                        </span>
+                                      ) : (
+                                        <span className="px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800">
+                                          Not Shipped
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="mt-4">
+                                      {shippingStatuses[order._id] !== "Shipped" && (
+                                        <Button
+                                          onClick={(e) => {
+                                            e.stopPropagation()
+                                            handleShipOrder(order)
+                                          }}
+                                        >
+                                          Ship Order
+                                        </Button>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
                               </div>

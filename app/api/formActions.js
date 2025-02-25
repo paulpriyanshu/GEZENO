@@ -6,7 +6,7 @@ export async function sendContactDetails(formData) {
   const message = formData.get("message");
 
   try {
-    const response = await fetch("https://backend.gezeno.in/api/contact-details", {
+    const response = await fetch("https://backend.gezeno.in/api/users/contact-details", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

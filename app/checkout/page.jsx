@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { CreditCard, Wallet, Building2, Send, ChevronDown, ShoppingBag, Package, Shield } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -9,51 +9,86 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import axios from "axios"
 import { useRouter } from "next/navigation"
 import Cookie from "js-cookie"
+import useSWR from "swr"
+
+const fetcher = (url) => axios.get(url).then((res) => res.data)
 
 export default function PaymentMethods() {
-  const [cartProducts, setCartProducts] = useState([])
-  const [cartLoading, setCartLoading] = useState(false)
   const [selectedPayment, setSelectedPayment] = useState("cod")
   const router = useRouter()
-  const email = Cookie.get("cred")
+  const userEmail = Cookie.get("cred")
+
+  const { data: cart, error: cartError } = useSWR(
+    userEmail ? `https://backend.gezeno.in/api/users/cart/${userEmail}` : null,
+    fetcher,
+  )
+
+  const cartProducts =
+    cart?.items?.map((item) => ({
+      ...item.product,
+      quantity: item.quantity,
+      selectedSize: item.size,
+      price: item.price,
+      total: item.total,
+      discountAmount: item.discountAmount || 0,
+    })) || []
 
   const handlePay = async () => {
     try {
-      const user_data = await axios.post("https://backend.gezeno.in/api/get-user", { email })
+      const user_data = await axios.post("https://backend.gezeno.in/api/users/get-user", { email: userEmail })
       console.log("user data", user_data.data)
       if (user_data.status === 200 && user_data.data.address) {
         const orderItems = cartProducts.map((product) => ({
           name: product.name,
           quantity: product.quantity,
-          image: product.image,
-          price: product.price,
           product: product._id,
-          size: product.selectedSize,
+          size: product.selectedSize || null,
         }))
 
-        const itemsPrice = calculateTotal()
-        const taxPrice = 0 // Assuming no tax for now
+        const subtotal = cart.total
+        const taxPrice = subtotal * 0.18 // 18% GST
         const shippingPrice = selectedPayment === "cod" ? 20 : 0
-        const totalPrice = itemsPrice + taxPrice + shippingPrice
-
-        const order = await axios.post("https://backend.gezeno.in/api/createorder", {
+        const totalPrice = cart.total + taxPrice + shippingPrice
+        const orderData = {
           shippingInfo: user_data.data.address,
           orderItems,
           paymentInfo: {
-            id: "payment_id", // You might want to generate this based on the payment method
+            id: "payment_id",
             status: "pending",
             method: selectedPayment,
           },
-          itemsPrice,
+          itemsPrice: subtotal,
           taxPrice,
           shippingPrice,
           totalPrice,
+          couponsApplied: cart.couponApplied ? [cart.couponApplied] : [], // Convert to array format
           userId: user_data.data._id,
-        })
+        };
+        
+        // Print the order data before sending the request
+        console.log("Order Data:", orderData);
+        
+        const order = await axios.post("https://backend.gezeno.in/api/orders/createOrder", orderData);
+        // const order = await axios.post("https://backend.gezeno.in/api/createOrder", {
+        //   shippingInfo: user_data.data.address,
+        //   orderItems,
+        //   paymentInfo: {
+        //     id: "payment_id",
+        //     status: "pending",
+        //     method: selectedPayment,
+        //   },
+        //   itemsPrice: subtotal,
+        //   taxPrice,
+        //   shippingPrice,
+        //   totalPrice,
+        //   couponsApplied: cart.couponApplied ? [cart.couponApplied] : [], // Convert to array format
+        //   userId: user_data.data._id,
+        // })
 
-        console.log("Order created:", order.data)
+        console.log("Order created:", order)
 
-        localStorage.setItem("cart", JSON.stringify([]))
+        // Clear the cart after successful order creation
+        await axios.post(`https://backend.gezeno.in/api/users/emptyCart/${userEmail}`)
 
         router.push("/myaccount/myorders")
       } else {
@@ -65,53 +100,20 @@ export default function PaymentMethods() {
     }
   }
 
-  const fetchCartProducts = async () => {
-    setCartLoading(true)
-    try {
-      const cartData = localStorage.getItem("cart")
-      const cartItems = cartData ? JSON.parse(cartData) : []
-      // console.log("cart",cartItems[0].productId)
-
-      const productPromises = cartItems.map((item) =>
-        axios
-          .get(`https://backend.gezeno.in/api/products/${item.productId}`)
-          .then((res) => ({
-            ...res.data,
-            quantity: item.quantity,
-            selectedSize: item.selectedSize,
-          }))
-          .catch((err) => {
-            console.error(`Error fetching product ${item.productId}:`, err)
-            return null
-          }),
-      )
-
-      const products = await Promise.all(productPromises)
-      const validProducts = products.filter((product) => product !== null)
-      console.log("Fetched products:", validProducts)
-      setCartProducts(validProducts)
-    } catch (error) {
-      console.error("Error fetching cart products:", error)
-    } finally {
-      setCartLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchCartProducts()
-  }, [])
-
   const calculateTotal = () => {
     return cartProducts.reduce((total, product) => {
-      const price = product.price
-      return total + price * product.quantity
+      return total + product.price * product.quantity - product.discountAmount
     }, 0)
   }
 
-  const totalMRP = calculateTotal()
-  const bagDiscount = 0
+  const totalMRP = cartProducts.reduce((total, product) => total + product.price * product.quantity, 0)
+  const bagDiscount = cartProducts.reduce((total, product) => total + (product.discountAmount || 0), 0)
   const deliveryFee = selectedPayment === "cod" ? 20 : 0
-  const subtotal = totalMRP - bagDiscount + deliveryFee
+  const taxAmount = (totalMRP - bagDiscount) * 0.18 // 18% GST
+  const subtotal = totalMRP - bagDiscount + deliveryFee + taxAmount
+
+  if (cartError) return <div>Failed to load cart</div>
+  if (!cart) return <div>Loading...</div>
 
   return (
     <div className="container mx-auto p-6">
@@ -169,7 +171,7 @@ export default function PaymentMethods() {
 
           <div className="space-y-4">
             <Button className="w-full bg-cyan-200 hover:bg-cyan-300 text-black" onClick={handlePay}>
-              PAY ₹{subtotal.toFixed(2)}
+              PAY ₹{cart?.total?.toFixed(2)}
             </Button>
             <div className="text-center text-sm text-muted-foreground">
               <span className="inline-block border-t px-4">OR</span>
@@ -197,42 +199,48 @@ export default function PaymentMethods() {
               <ChevronDown className="h-5 w-5" />
             </CollapsibleTrigger>
             <CollapsibleContent className="p-4 border-x border-b rounded-b-lg">
-              {cartLoading ? (
-                <p>Loading cart items...</p>
-              ) : (
-                cartProducts.map((product) => (
-                  <div key={product._id} className="flex justify-between items-center py-2">
-                    <div>
-                      <p>{product.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Quantity: {product.quantity}, Size: {product.selectedSize || "N/A"}
-                      </p>
-                    </div>
-                    <p>₹{((product.discountedPrice || product.price) * product.quantity).toFixed(2)}</p>
+              {cartProducts.map((product) => (
+                <div key={product._id} className="flex justify-between items-center py-2">
+                  <div>
+                    <p>{product.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Quantity: {product.quantity}, Size: {product.selectedSize || "N/A"}
+                    </p>
                   </div>
-                ))
-              )}
+                  <p>₹{(product.price * product.quantity).toFixed(2)}</p>
+                </div>
+              ))}
             </CollapsibleContent>
           </Collapsible>
 
           <div className="border rounded-lg p-4 space-y-4">
             <h3 className="font-semibold">PRICE SUMMARY</h3>
             <div className="space-y-2">
+              {cartProducts.map((product) => (
+                <div key={product._id} className="flex justify-between text-sm">
+                  <span>
+                    {product.name} (x{product.quantity})
+                  </span>
+                  <span>₹{(product.price * product.quantity).toFixed(2)}</span>
+                </div>
+              ))}
               <div className="flex justify-between">
                 <span>Total MRP (Incl. of taxes)</span>
-                <span>₹{totalMRP.toFixed(2)}</span>
+                <span>₹{cart?.subtotal?.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-green-600">
-                <span>Bag Discount</span>
-                <span>-₹{bagDiscount.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-green-600">
+              {cart?.couponApplied && (
+                <div className="flex justify-between text-green-600">
+                  <span>Coupon Applied ({cart.couponApplied.code})</span>
+                  <span>-₹{cart.couponApplied.discountAmount.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between">
                 <span>Delivery Fee</span>
                 <span>{deliveryFee === 0 ? "Free" : `₹${deliveryFee.toFixed(2)}`}</span>
               </div>
               <div className="flex justify-between font-bold pt-2 border-t">
-                <span>Subtotal</span>
-                <span>₹{subtotal.toFixed(2)}</span>
+                <span>Total Amount</span>
+                <span>₹{cart?.total?.toFixed(2)}</span>
               </div>
             </div>
           </div>
