@@ -10,44 +10,35 @@ import DropDownMenu from "./DropDownMenu"
 import MobileSearch from "@/components/MobileSearch"
 import UserLogo from "./UserLogo"
 import Link from "next/link"
+import useSWR from 'swr'
+
+const fetcher = (url) => fetch(url).then((res) => res.json())
 
 export default function NavBar({ data }) {
   const [hoveredCategory, setHoveredCategory] = useState(null)
-  const [cartItemCount, setCartItemCount] = useState(0)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [username, setUsername] = useState("")
   const router = useRouter()
   const dispatch = useAppDispatch()
-  useEffect(()=>{
-    console.log("insede header",data)
-  })
-  
+
   useEffect(() => {
-    // Check if authToken exists in cookies
+    console.log("inside header", data)
+  })
+
+  useEffect(() => {
     const token = Cookies.get("authToken")
     setIsLoggedIn(!!token)
 
-    // Get username from cookie
     const name = Cookies.get("name")
     if (name) {
       setUsername(name)
     }
   }, [])
 
-  useEffect(() => {
-    const updateCartCount = () => {
-      const cartItems = JSON.parse(localStorage.getItem("cart") || "[]")
-      setCartItemCount(cartItems.length)
-    }
+  const userEmail = Cookies.get('cred')
+  const { data: cartData, error } = useSWR(userEmail ? `https://backend.gezeno.in/api/cart/${userEmail}` : null, fetcher, { refreshInterval: 1000 })
 
-    updateCartCount() // Initial count
-
-    // Check localStorage every second
-    const intervalId = setInterval(updateCartCount, 1000)
-
-    // Clean up interval on component unmount
-    return () => clearInterval(intervalId)
-  }, [])
+  const cartItemCount = cartData ? cartData.items.length : 0
 
   const handleCategoryHover = (categoryId) => {
     setHoveredCategory(categoryId)
@@ -62,17 +53,15 @@ export default function NavBar({ data }) {
   }
 
   const { data: categories } = data
+
   const handleLogout = () => {
-    // Remove all the specified cookies
     Cookies.remove("authToken", { path: "/" })
     Cookies.remove("cred", { path: "/" })
     Cookies.remove("name", { path: "/" })
 
-    // Optionally, clear any client-side states
     setIsLoggedIn(false)
     setUsername("")
 
-    // Redirect the user to the login page
     router.push("/")
   }
 
@@ -80,7 +69,6 @@ export default function NavBar({ data }) {
     <div className="sticky top-0 z-10 bg-white border-b border-slate-200">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Left Section */}
           <div className="flex items-center gap-5">
             <button onClick={() => dispatch(toggleSidebar())} className="md:hidden">
               <img src="/hamburger.svg" alt="menu logo" width={24} height={24} />
@@ -126,7 +114,6 @@ export default function NavBar({ data }) {
             </nav>
           </div>
 
-          {/* Right Section */}
           <div className="flex items-center gap-6">
             <div className="relative hidden md:block">
               <div className="w-[400px] bg-gray-100 rounded-md">
@@ -207,4 +194,3 @@ export default function NavBar({ data }) {
     </div>
   )
 }
-

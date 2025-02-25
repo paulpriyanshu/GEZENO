@@ -18,32 +18,6 @@ import {
 } from "@/components/ui/table"
 import axios from "axios"
 
-// Sample data
-// const contacts = [
-//   {
-//     id: 1,
-//     name: "Alex Thompson",
-//     email: "alex.t@example.com",
-//     message:
-//       "Hi, I would love to discuss the project details. I have some great ideas that could really enhance the user experience and streamline the workflow. Let me know when you're available for a call.",
-//   },
-//   {
-//     id: 2,
-//     name: "Sarah Wilson",
-//     email: "sarah.w@example.com",
-//     message:
-//       "Thanks for reaching out! I've reviewed the proposal and have a few questions about the timeline and deliverables. Could we schedule a meeting to go through them?",
-//   },
-//   {
-//     id: 3,
-//     name: "Michael Chen",
-//     email: "m.chen@example.com",
-//     message:
-//       "Just wanted to follow up on our previous conversation. I've prepared some mockups for the new feature. Looking forward to your feedback!",
-//   },
-// ]
-
-
 export default function ContactList() {
   const [expandedRows, setExpandedRows] = React.useState([])
   const [contacts,setContacts]=React.useState([])

@@ -1,6 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect } from "react"
+
+import { useState } from "react"
 import { Heart, MapPin, Plus, ShoppingBag, Star, FileText, RotateCcw } from "lucide-react"
 import { motion } from "framer-motion"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -11,7 +13,7 @@ import { Input } from "@/components/ui/Input"
 import { cn } from "@/lib/utils"
 import Reviews from "./reviews"
 import { toast } from "react-hot-toast"
-
+import Cookie from "js-cookie"
 const dropdownVariants = {
   hidden: { height: 0, opacity: 0 },
   visible: { height: "auto", opacity: 1 },
@@ -29,13 +31,8 @@ export default function ProductInfo({ product }) {
   const [selectedFilters, setSelectedFilters] = useState({})
   const [selectedVariant, setSelectedVariant] = useState(null)
   const [allFilters, setAllFilters] = useState({})
-  const [productIds, setProductIds] = useState(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("cart")
-      return saved ? JSON.parse(saved) : []
-    }
-    return []
-  })
+  const [isLoading, setIsLoading] = useState(false)
+  const email = Cookie.get("cred")
   console.log("product", product)
 
   useEffect(() => {
@@ -139,7 +136,7 @@ export default function ProductInfo({ product }) {
     router.push(`/products/${variantId}`)
   }
 
-  const handleAddToBag = () => {
+  const handleAddToBag = async () => {
     try {
       // Check if sizes exist and no size is selected
       if (product.sizes?.length > 0 && !selectedSize) {
@@ -147,41 +144,33 @@ export default function ProductInfo({ product }) {
         return
       }
 
-      const productWithFilters = {
-        productId: product._id,
-        selectedFilters,
-        selectedSize,
-        quantity: 1,
+      setIsLoading(true)
+
+      const response = await fetch("https://backend.gezeno.in/api/addToCart", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email, // Replace with actual user ID/email
+          productId: product._id,
+          quantity: 1,
+          price: product.price,
+          size: selectedSize, // Add the selected size to the request
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to add item to cart")
       }
 
-      // Check if product already exists in cart
-      const existingProductIndex = productIds.findIndex(
-        (item) =>
-          item.productId === productWithFilters.productId &&
-          item.selectedSize === productWithFilters.selectedSize &&
-          JSON.stringify(item.selectedFilters) === JSON.stringify(productWithFilters.selectedFilters),
-      )
-
-      let updatedItems
-      if (existingProductIndex > -1) {
-        // If product exists, increment quantity
-        updatedItems = productIds.map((item, index) => {
-          if (index === existingProductIndex) {
-            return { ...item, quantity: item.quantity + 1 }
-          }
-          return item
-        })
-        toast.success("Product quantity updated in bag")
-      } else {
-        // If product doesn't exist, add new item
-        updatedItems = [...productIds, productWithFilters]
-        toast.success("Added to bag with selected options")
-      }
-
-      setProductIds(updatedItems)
-      localStorage.setItem("cart", JSON.stringify(updatedItems))
+      const data = await response.json()
+      toast.success("Added to bag successfully")
     } catch (error) {
+      console.error("Error adding to cart:", error)
       toast.error("Error adding product to bag")
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -308,12 +297,17 @@ export default function ProductInfo({ product }) {
             product.sizes?.length > 0 && !selectedSize
               ? "bg-slate-600 hover:bg-gray-100 cursor-not-allowed opacity-50"
               : "",
+            isLoading && "opacity-50 cursor-not-allowed",
           )}
           onClick={handleAddToBag}
-          disabled={product.sizes?.length > 0 && !selectedSize}
+          disabled={(product.sizes?.length > 0 && !selectedSize) || isLoading}
         >
-          <ShoppingBag className="w-5 h-5 mr-2" />
-          {"ADD TO BAG"}
+          {isLoading ? (
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+          ) : (
+            <ShoppingBag className="w-5 h-5 mr-2" />
+          )}
+          {isLoading ? "ADDING..." : "ADD TO BAG"}
         </Button>
         <Button className="flex-1 h-12 bg-white text-black hover:bg-slate-100">
           <Heart className="w-5 h-5 mr-2" />
