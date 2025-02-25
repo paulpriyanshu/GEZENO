@@ -164,7 +164,7 @@ export default function CartPage() {
   // Add this function near the other cart-related functions
   const removeCoupon = async () => {
     try {
-      await axios.post(`https://backend.gezeno.in/api/removeCoupon`, {
+      await axios.post(`https://backend.gezeno.in/api/users/removeCoupon`, {
         email: userEmail,
         // cart: updatedCart,
       })
