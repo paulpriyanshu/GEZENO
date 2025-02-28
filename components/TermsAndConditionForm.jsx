@@ -28,7 +28,7 @@ const TermsAndConditionForm = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          "https://backend.gezeno.in/api/products/products/terms-and-conditions"
+          "https://backend.gezeno.in/api/products/terms-and-conditions"
         );
         const data = response.data;
 
@@ -58,7 +58,7 @@ const TermsAndConditionForm = () => {
   const handleSave = async () => {
     try {
       const data = await axios.post(
-        "https://backend.gezeno.in/api/products/products/terms-and-conditions",
+        "https://backend.gezeno.in/api/products/terms-and-conditions",
         {
           terms,
           privacyPolicy,
