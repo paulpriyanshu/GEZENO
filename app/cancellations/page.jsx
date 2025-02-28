@@ -4,7 +4,7 @@ import NavBar from "@/components/NavBar"
 // Function to fetch terms and conditions
 async function getTermsAndConditions() {
   try {
-    const res = await fetch("https://backend.gezeno.in/api/terms-and-conditions", {
+    const res = await fetch("https://backend.gezeno.in/api/products/terms-and-conditions", {
       headers: { "Content-Type": "application/json" },
       next: { revalidate: 5 }, // Enables caching & revalidation every 5 sec
     })

@@ -20,7 +20,7 @@ export default function ContactPage() {
 
   useEffect(() => {
     // Fetch contact data
-    fetch("https://backend.gezeno.in/api/terms-and-conditions")
+    fetch("https://backend.gezeno.in/api/products/terms-and-conditions")
       .then((res) => res.json())
       .then((data) => setContactData(data.contactus))
       .catch((error) => console.error("Error fetching contact data:", error))
@@ -41,7 +41,7 @@ export default function ContactPage() {
     setIsSending(true)
 
     try {
-      const response = await fetch("https://backend.gezeno.in/api/contact-details", {
+      const response = await fetch("https://backend.gezeno.in/api/users/contact-details", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
