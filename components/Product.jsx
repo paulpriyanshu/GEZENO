@@ -29,6 +29,7 @@ import { motion } from "framer-motion"
 import Reviews from "./Reviews"
 import toast, { Toaster } from "react-hot-toast"
 import MobileHomeFooter from "./MobileHomeFooter"
+import Cookies from "js-cookie"
 
 const dropdownVariants = {
   hidden: { height: 0, opacity: 0 },
@@ -67,6 +68,7 @@ export default function Product({ id }) {
   const [selectedVariant, setSelectedVariant] = useState(null)
   const [productIds, setProductIds] = useState([])
   const router = useRouter()
+  const userEmail=Cookies.get('cred')
 
   const sizes = ["XS", "S", "M", "L", "XL", "2XL"]
   // const showNotification = (message, type = 'success') => {
@@ -99,6 +101,7 @@ export default function Product({ id }) {
   }
   const handleAddToBag = async () => {
     try {
+      const data=await axios.post(`http://backend.gezeno.in/api/users/cart/${userEmail}`)
       const items = [...productIds, product._id]
       setProductIds(items)
 

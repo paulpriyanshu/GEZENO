@@ -73,11 +73,11 @@ export default function CartPage() {
         ...cart,
         items: cart.items.filter((item) => item.product._id !== productId),
       }
-      mutate(`https://backend.gezeno.in/api/cart/${userEmail}`, optimisticData, false)
+      mutate(`https://backend.gezeno.in/api/users/cart/${userEmail}`, optimisticData, false)
 
       // Make API call
       console.log("email", userEmail, "prosduct Id", productId, "selectedSize", product.selectedSize)
-      await axios.post(`https://backend.gezeno.in/api/${userEmail}/${productId}`, {
+      await axios.post(`https://backend.gezeno.in/api/users/${userEmail}/${productId}`, {
         size: product.selectedSize, // Send size directly as JSON
       })
 
@@ -101,10 +101,10 @@ export default function CartPage() {
           item.product._id === productId ? { ...item, quantity: newQuantity, total: item.price * newQuantity } : item,
         ),
       }
-      mutate(`https://backend.gezeno.in/api/cart/${userEmail}`, optimisticData, false)
+      mutate(`https://backend.gezeno.in/api/users/cart/${userEmail}`, optimisticData, false)
 
       // Use new updateCart endpoint
-      await axios.post(`https://backend.gezeno.in/api/updateCart`, {
+      await axios.post(`https://backend.gezeno.in/api/users/updateCart`, {
         email: userEmail,
         productId,
         quantity: newQuantity,
