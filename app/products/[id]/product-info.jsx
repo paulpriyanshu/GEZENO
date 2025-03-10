@@ -35,6 +35,45 @@ export default function ProductInfo({ product }) {
   const [isLoading, setIsLoading] = useState(false)
   const email = Cookie.get("cred")
   console.log("product", product)
+  useEffect(() => {
+    // Function to sync localStorage cart with user account
+    const syncCartWithUser = async () => {
+      const email = Cookie.get("cred")
+      if (!email) return
+  
+      // Check if there are items in localStorage
+      const localCart = JSON.parse(localStorage.getItem("guestCart") || "[]")
+      if (localCart.length === 0) return
+  
+      try {
+        // Send each item to the API
+        for (const item of localCart) {
+          await axios.post("https://backend.gezeno.in/api/users/addToCart", {
+            email,
+            productId: item.productId,
+            quantity: item.quantity,
+            price: item.price,
+            size: item.size,
+          })
+        }
+  
+        // Clear localStorage after successful sync
+        localStorage.removeItem("guestCart")
+        toast.success("Cart items synced with your account")
+      } catch (error) {
+        console.error("Error syncing cart:", error)
+      }
+    }
+  
+    // Check for email on component mount and cookie changes
+    syncCartWithUser()
+  
+    // Set up interval to check for email periodically
+    const intervalId = setInterval(syncCartWithUser, 5000)
+  
+    return () => clearInterval(intervalId)
+  }, [])
+  
 
   useEffect(() => {
     const filters = {}
@@ -138,6 +177,7 @@ export default function ProductInfo({ product }) {
   }
 
   const handleAddToBag = async () => {
+    if(!email) router.push('/login')
     try {
       // Check if sizes exist and no size is selected
       if (product.sizes?.length > 0 && !selectedSize) {
@@ -147,20 +187,52 @@ export default function ProductInfo({ product }) {
 
       setIsLoading(true)
 
-      const data = await axios.post("https://backend.gezeno.in/api/users/addToCart", {
+      const cartItem = {
+        productId: product._id,
+        quantity: 1,
+        price: product.price,
+        size: selectedSize,
+        name: product.name,
+        image: product.images?.[0] || "",
+        addedAt: new Date().toISOString(),
+      }
 
-          email, // Replace with actual user ID/email
+      // Check if user is logged in
+      const email = Cookie.get("cred")
+
+      if (email) {
+        // User is logged in, send directly to API
+        const data = await axios.post("https://backend.gezeno.in/api/users/addToCart", {
+          email,
           productId: product._id,
           quantity: 1,
           price: product.price,
-          size: selectedSize, // Add the selected size to the request
-      })
+          size: selectedSize,
+        })
 
-      if (!data) {
-        throw new Error("Failed to add item to cart")
+        if (!data) {
+          throw new Error("Failed to add item to cart")
+        }
+      } else {
+        // User is not logged in, store in localStorage
+        const localCart = JSON.parse(localStorage.getItem("guestCart") || "[]")
+
+        // Check if item already exists in cart
+        const existingItemIndex = localCart.findIndex(
+          (item) => item.productId === product._id && item.size === selectedSize,
+        )
+
+        if (existingItemIndex >= 0) {
+          // Update quantity if item exists
+          localCart[existingItemIndex].quantity += 1
+        } else {
+          // Add new item to cart
+          localCart.push(cartItem)
+        }
+
+        localStorage.setItem("guestCart", JSON.stringify(localCart))
       }
 
-      // const data = await response.json()
       toast.success("Added to bag successfully")
     } catch (error) {
       console.error("Error adding to cart:", error)
@@ -508,4 +580,5 @@ export default function ProductInfo({ product }) {
     </div>
   )
 }
+
 

@@ -36,6 +36,7 @@ export default function OrdersPage() {
     try {
       const response = await fetch("https://backend.gezeno.in/api/orders/orders")
       const data = await response.json()
+      console.log("all the orders",data.orders)
       setOrders(data.orders)
       // Initialize shipping statuses
       const initialShippingStatuses = {}
@@ -117,14 +118,22 @@ export default function OrdersPage() {
       console.log("Formatted Order Data:", formattedOrderData)
 
       // Call your backend API instead of Shiprocket directly
-      const data = await axios.post("https://backend.gezeno.in/api/orders/shiprocket/create-order",formattedOrderData);
+      const response = await axios.post("https://backend.gezeno.in/api/orders/shiprocket/create-order", formattedOrderData)
 
-      console.log("Shipping Response:", data)
+      console.log("Shipping Response:", response)
 
-      if (data.data.status_code === 1) {
+      if (response.data.status_code === 1) {
+        // Update the order in state to include the order_id from the response
+        setOrders((prevOrders) =>
+          prevOrders.map((prevOrder) =>
+            prevOrder._id === order._id ? { ...prevOrder, order_id: response.data.order_id || "pending" } : prevOrder,
+          ),
+        )
+
+        // Update shipping status to Pending
         setShippingStatuses((prev) => ({
           ...prev,
-          [order._id]: "Shipped",
+          [order._id]: "Pending",
         }))
       } else {
         setShippingStatuses((prev) => ({
@@ -137,11 +146,6 @@ export default function OrdersPage() {
       setShippingStatuses((prev) => ({
         ...prev,
         [order._id]: "Not Shipped",
-      }))
-    } finally {
-      setShippingStatuses((prev) => ({
-        ...prev,
-        [order._id]: "Shipped",
       }))
     }
   }
@@ -312,9 +316,7 @@ export default function OrdersPage() {
                           </span>
                         </TableCell>
                         <TableCell>
-                          {shippingStatuses[order._id] === "Shipped" ? (
-                            <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">Shipped</span>
-                          ) : shippingStatuses[order._id] === "Pending" ? (
+                          {order.order_id || shippingStatuses[order._id] === "Pending" ? (
                             <span className="px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800">
                               Pending
                             </span>
@@ -491,7 +493,11 @@ export default function OrdersPage() {
                                     </div>
                                     <div className="flex items-center gap-2">
                                       <span className="font-medium">Shipping Status:</span>
-                                      {shippingStatuses[order._id] === "Shipped" ? (
+                                      {order.order_id ? (
+                                        <span className="px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800">
+                                          Pending
+                                        </span>
+                                      ) : shippingStatuses[order._id] === "Shipped" ? (
                                         <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
                                           Shipped
                                         </span>
@@ -502,16 +508,18 @@ export default function OrdersPage() {
                                       )}
                                     </div>
                                     <div className="mt-4">
-                                      {shippingStatuses[order._id] !== "Shipped" && (
-                                        <Button
-                                          onClick={(e) => {
-                                            e.stopPropagation()
-                                            handleShipOrder(order)
-                                          }}
-                                        >
-                                          Ship Order
-                                        </Button>
-                                      )}
+                                      {!order.order_id &&
+                                        shippingStatuses[order._id] !== "Shipped" &&
+                                        shippingStatuses[order._id] !== "Pending" && (
+                                          <Button
+                                            onClick={(e) => {
+                                              e.stopPropagation()
+                                              handleShipOrder(order)
+                                            }}
+                                          >
+                                            Ship Order
+                                          </Button>
+                                        )}
                                     </div>
                                   </div>
                                 </div>

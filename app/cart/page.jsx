@@ -12,6 +12,7 @@ import Cookie from "js-cookie"
 import { Input } from "@/components/ui/Input"
 import useSWR, { mutate } from "swr"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { OffersSidebar } from "./offers-sidebar"
 
 // Fetcher function for SWR
 const fetcher = async (url) => {
@@ -28,6 +29,10 @@ export default function CartPage() {
   const [newTotal, setNewTotal] = useState(null)
   const router = useRouter()
   const userEmail = Cookie.get("cred")
+  const [guestCart,setGuestCart]=useState([])
+
+  // Add state for offers sidebar
+  const [offersSidebarOpen, setOffersSidebarOpen] = useState(false)
 
   // Fetch navbar data
   useSWR("https://backend.gezeno.in/api/home/headers", fetcher, {
@@ -49,6 +54,7 @@ export default function CartPage() {
     revalidateOnFocus: true,
     dedupingInterval: 5000,
   })
+
   console.log("original cart", cart)
   const cartProducts =
     cart?.items?.map((item) => ({
@@ -157,6 +163,37 @@ export default function CartPage() {
       }
     } catch (error) {
       console.log("error", error)
+      setCouponError(error.response?.data?.message || "Failed to apply coupon")
+    }
+  }
+
+  // Add this function to handle applying coupons from the sidebar
+  const applyCoupon = async (code) => {
+    setCouponCode(code)
+    setOffersSidebarOpen(false)
+    setShowCouponInput(true)
+
+    // Automatically validate the coupon after setting it
+    try {
+      const categoryIds = cartProducts.map((product) => product.category).filter(Boolean)
+      const productIds = cartProducts.map((product) => product._id)
+      const orderValue = cartProducts.reduce((total, item) => total + item.price * item.quantity, 0)
+
+      const response = await axios.post("https://backend.gezeno.in/api/apply", {
+        email: userEmail,
+        couponCode: code,
+        orderValue,
+        categoryIds,
+        productIds,
+      })
+
+      if (response.data.success) {
+        setCouponError("")
+        setNewTotal(response.data.total)
+        setShowCouponInput(false)
+        mutateCart()
+      }
+    } catch (error) {
       setCouponError(error.response?.data?.message || "Failed to apply coupon")
     }
   }
@@ -376,7 +413,14 @@ export default function CartPage() {
                   <Button
                     variant="link"
                     className="text-[#38b2ac] font-medium p-0"
-                    onClick={() => setShowCouponInput(!showCouponInput)}
+                    onClick={() => {
+                      // Modified to open the sidebar instead of toggling input
+                      if (!showCouponInput) {
+                        setOffersSidebarOpen(true)
+                      } else {
+                        setShowCouponInput(false)
+                      }
+                    }}
                   >
                     {showCouponInput ? "« Close" : "Redeem »"}
                   </Button>
@@ -393,11 +437,6 @@ export default function CartPage() {
                       <Button onClick={validateCoupon}>Apply</Button>
                     </div>
                     {couponError && <p className="text-red-500 text-sm">{couponError}</p>}
-                    {/* {appliedDiscount > 0 && (
-                      <p className="text-green-600 text-sm">
-                        Coupon applied successfully! You saved ₹{appliedDiscount}
-                      </p>
-                    )} */}
                   </div>
                 )}
               </div>
@@ -487,10 +526,7 @@ export default function CartPage() {
                 <div className="flex justify-between items-center max-w-lg mx-auto">
                   <div>
                     <p className="text-sm">Total</p>
-                    <p className="font-bold">
-                      {/* ₹{newTotal ? newTotal : cartProducts.reduce((total, item) => total + item.price * item.quantity, 0)} */}
-                      ₹{cart?.total}
-                    </p>
+                    <p className="font-bold">₹{cart?.total}</p>
                   </div>
                   <Button
                     className="bg-[#38b2ac] hover:bg-[#319795] text-white px-8 md:px-12 py-6"
@@ -527,6 +563,9 @@ export default function CartPage() {
           </div>
         </div>
       </div>
+
+      {/* Offers Sidebar */}
+      <OffersSidebar open={offersSidebarOpen} onOpenChange={setOffersSidebarOpen} onApplyCoupon={applyCoupon} />
 
       {/* Bottom padding for mobile */}
       <div className="h-20 md:h-0" />

@@ -19,6 +19,7 @@ export default function NavBar({ data }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [username, setUsername] = useState("")
   const router = useRouter()
+  const email=Cookies.get('cred')
   const dispatch = useAppDispatch()
 
   useEffect(() => {
@@ -179,7 +180,7 @@ export default function NavBar({ data }) {
                 <img src="/heart.png" width={20} height={20} alt="Wishlist" />
               </button>
 
-              <button className="text-gray-600 hover:text-gray-900 relative" onClick={() => router.push("/cart")}>
+              <button className="text-gray-600 hover:text-gray-900 relative" onClick={() => email ? router.push("/cart") : router.push('/login')}>
                 <img src="/ic-web-head-cart.svg" width={24} height={24} alt="Cart" />
                 {cartItemCount > 0 && (
                   <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-md transform transition-transform duration-200 hover:scale-110">

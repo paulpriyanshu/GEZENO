@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { toggleSidebar } from "../lib/store/features/adminsidebar/SideBarSlice";
 import { useAppSelector } from "../lib/hooks";
+import jwt from "jsonwebtoken"
 
 export default function Layout({ children }) {
   const isOpen = useAppSelector((state) => state.sidebar.isOpen);
@@ -18,10 +19,17 @@ export default function Layout({ children }) {
   // ✅ Check for Admin Session Before Rendering
   useEffect(() => {
     const token = localStorage.getItem("adminToken");
+    if (token) {
+      const decoded = jwt.decode(token);
+      if (decoded.exp * 1000 < Date.now()) {
+          localStorage.removeItem("adminToken");
+          window.location.href = "/adminLogin"; // Redirect to login page
+      }
+    }
 
-    if (!token) {
-      router.replace("/adminLogin"); // Redirect to login only if no token
-    } 
+    // if (!token) {
+    //   router.replace("/adminLogin"); // Redirect to login only if no token
+    // } 
 
     setLoading(false); // Stop loading once token check is done
   }, []);
