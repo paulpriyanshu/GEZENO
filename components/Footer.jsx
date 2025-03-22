@@ -34,11 +34,8 @@ export default function Footer() {
   <h3 className="text-teal-300 font-semibold mb-4">COMPANY</h3>
   <ul className="space-y-2">
     {[
-      { name: 'About Us', href: '/about-us' },
-      { name: "We're Hiring", href: '/we-re-hiring' },
       { name: 'Terms & Conditions', href: '/terms&conditions' },
       { name: 'Privacy Policy', href: '/privacy' },
-      { name: 'Blog', href: '/blog' },
     ].map((item) => (
       <li key={item.name}>
         <a href={item.href} className="hover:text-teal-300">{item.name}</a>
@@ -89,7 +86,7 @@ export default function Footer() {
         <hr className="border-gray-700 mb-8" />
         
         {/* Product Categories */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+        {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           <div>
             <h3 className="font-semibold mb-4">MEN&apos;S CLOTHING</h3>
             <ul className="space-y-2 text-sm">
@@ -123,7 +120,7 @@ export default function Footer() {
               <h3 className="font-semibold mb-2">SITEMAP</h3>
             </div>
           </div>
-        </div>
+        </div> */}
         
         {/* Company Description */}
         <div className="mb-8">
